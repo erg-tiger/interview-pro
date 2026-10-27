@@ -1,0 +1,95 @@
+version: 0.5.0
+tags: [timeline, process, product-artifact, ai-usage]
+
+# Purpose: a running log of work completed. For now its sole use is to populate the product artifact.
+# It is not a plan or task list. The `planned_steps` section below is reserved for later and must stay
+# empty and unused until the project plan file is created.
+#
+# One beat per notable milestone (plan, data, tested slice, design pivot), not per file or folder.
+# Append new beats to the end. Bump `version` on every change.
+#
+# Beat template:
+#   - id: beat-002                 # sequential
+#     date: YYYY-MM-DD
+#     title: Short milestone name
+#     summary: One or two sentences on what was done.
+#     outcomes:                    # optional: what was accomplished
+#       - Concrete result
+#     why_it_matters: Optional. Why this was important.#     decisions:                   # judgment calls and why
+#       - Decision and rationale
+#     ai_usage:
+#       tools: [Copilot]
+#       purpose: What AI was used for
+#       ai_was_wrong: What AI got wrong and how it was handled, or null
+#       done_without_ai: What was deliberately done manually and why, or null
+#     artifact_sections: [problem-framing]  # problem-framing | solution-design | trust-and-failure | measurement | scenarios
+#     links: []                    # relevant files or references
+
+beats:
+  - id: beat-001
+    date: 2026-10-26
+    title: Established project foundations
+    summary: Captured the case brief, set repo conventions (frontmatter, instructions, templates), and scaffolded the GitHub Pages front end.
+    decisions:
+      - Static front end in docs/ with no build step, so it is easy to explain and reproduce.
+      - Required version and tags metadata on every file for search and version control.
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Scaffolding repo structure and templates
+      ai_was_wrong: null
+      done_without_ai: null
+    artifact_sections: []
+    links: [CONTEXT.md, .github/copilot-instructions.md, docs/index.html]
+
+  - id: beat-002
+    date: 2026-10-26
+    title: Foundations complete
+    summary: Finished the repo fundamentals so building can start with clear conventions, a place for reasoning, and configuration kept separate from code.
+    outcomes:
+      - .gitignore and editor settings (.editorconfig, .vscode/settings.json) to keep secrets out and formatting consistent.
+      - product-artifact/ folder pairing this timeline with decision records (0001-0003) and a template.
+      - Draft PLAN.md with problem framing, scope, open decisions, and test criteria.
+      - docs/data/ with synthetic data rules, and docs/config/ with starter YAML for scheduling goals, permissions, and qualifications.
+    why_it_matters: Capturing reasoning as work happens makes the process walkthrough and product artifact easy to assemble. Keeping goals, permissions, and qualifications in config rather than code is the core requirement of the case. Synthetic-only data and secret-safe defaults protect against the case's prohibited uses.
+    decisions:
+      - Keep decision records and pair them with the timeline in product-artifact/, after questioning their purpose.
+      - Keep data and config inside docs/ so GitHub Pages serves them with no copying (0002).
+      - JSON for data and YAML for config, trading one small library for readable rules (0003).
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Proposed fundamentals, drafted templates, starter config, and option analysis. Choices were made by the author.
+      ai_was_wrong: Initially placed decision records inside docs/, where GitHub Pages would publish them. Questioning their purpose led to moving them into product-artifact/.
+      done_without_ai: null
+    artifact_sections: [solution-design]
+    links: [PLAN.md, product-artifact/decisions, docs/config, docs/data/README.md]
+
+  - id: beat-003
+    date: 2026-10-27
+    title: Recalibrated scope, agent design, and LLM provider
+    summary: Narrowed to a dispatcher-only prototype anchored on on-demand work, moved judgment from a rule pipeline to an LLM with read-only tools, and chose delivery and provider after GitHub Models turned out to be retired.
+    outcomes:
+      - Personas, jobs to be done, and industry variants drafted in PLAN.md (decisions 0004, 0005, 0007).
+      - Redistribution logic (qualification, availability, profile-driven ranking, delayed slot, approval-gated displacement) defined, then reframed as prompt guidance (0006, 0009).
+      - Working agreement added to the instructions: stay on the case, push back on scope, optimize for the LLM.
+      - Pages hosts the product artifact and the prototype runs locally (0008).
+      - Provider-neutral LLM setup with a Gemini free-tier spike prepared.
+    why_it_matters: The first design was a deterministic filter pipeline that a rules engine could replace, which would not answer the case's question about why an agent is better. Recalibrating early kept the build small enough for the remaining time.
+    decisions:
+      - Dispatcher is the only built persona; technician and customer are context (0005).
+      - LLM decides, code only validates, applies, and logs (0009).
+      - Provider-neutral OpenAI-compatible interface, free-tier hosted model first, Ollama as fallback.
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Option analysis, drafting personas, decision records, config, and the spike script. Choices were made by the author.
+      ai_was_wrong: Recommended proximity as the first ranking criterion in both profiles, which contradicted the case's revenue requirement; the author caught it. Also offered GitHub Models as a provider without checking it was retired; a docs check found it shut down on 2026-07-30.
+      done_without_ai: null
+    artifact_sections: [solution-design, trust-and-failure]
+    links: [PLAN.md, product-artifact/decisions, docs/config, prototype/spike.mjs]
+
+# Reserved: do not populate or act on until the project plan file exists.
+# Future entries track remaining steps and progress against that plan.
+#   - id: step-001
+#     title: Step name
+#     status: not-started          # not-started | in-progress | done
+#     beat: null                   # beat id once completed
+planned_steps: []

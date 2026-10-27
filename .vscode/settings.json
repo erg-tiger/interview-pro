@@ -1,0 +1,9 @@
+// version: 0.1.0
+// tags: [vscode, settings, formatting]
+{
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true
+}

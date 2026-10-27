@@ -1,0 +1,32 @@
+# version: 0.2.0
+# tags: [config, scheduling, goals, industries, yaml]
+
+# Scheduling goal profiles. A profile defines two ordered lists of criteria:
+#   job_priority       - which jobs to cover first when capacity is short
+#   technician_ranking - how to rank qualified, available technicians (first is primary, rest break ties)
+# Qualification and availability are fixed hard constraints and are not set here.
+#
+# Criteria vocabulary (example values only):
+#   urgency, job_revenue, customer_wait, route_fit   (job_priority)
+#   proximity, revenue_protected, route_clustering   (technician_ranking)
+#   revenue_protected = the candidate whose assignment puts the least revenue at risk on their own schedule.
+
+# Business setting. Overrides the industry default below.
+active_profile: job_revenue
+
+# Default profile by industry, used until a business sets active_profile.
+industries:
+  plumbing: job_revenue
+  hvac: job_revenue
+  home_cleaning: drive_distance
+  pool_cleaning: drive_distance
+
+profiles:
+  drive_distance:
+    description: Recurring work (cleaning, pool). Minimize driving and keep routes intact.
+    job_priority: [route_fit, customer_wait]
+    technician_ranking: [proximity, route_clustering]
+  job_revenue:
+    description: On-demand work (plumbing, HVAC). Protect high-value and urgent jobs.
+    job_priority: [urgency, job_revenue]
+    technician_ranking: [revenue_protected, proximity]

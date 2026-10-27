@@ -1,0 +1,30 @@
+# version: 0.2.0
+# tags: [config, permissions, approval, yaml]
+
+# What the agent may do on its own. Each action is one of:
+#   autonomous - agent acts, dispatcher can undo
+#   approval   - agent proposes, dispatcher must approve
+#   forbidden  - agent never does this, hands off instead
+# Example values only.
+
+actions:
+  shift_job_time:
+    mode: autonomous
+    limits:
+      max_shift_minutes: 30
+  reassign_job:
+    mode: approval
+  propose_delayed_slot:
+    mode: approval
+  displace_job:
+    mode: approval
+  reschedule_to_another_day:
+    mode: approval
+  cancel_job:
+    mode: forbidden
+  contact_customer:
+    mode: approval
+
+# Hand off to the dispatcher when the agent is unsure or a tool fails.
+handoff:
+  min_confidence: 0.7

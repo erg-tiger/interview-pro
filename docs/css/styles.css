@@ -1,0 +1,20 @@
+/*
+version: 0.1.0
+tags: [frontend, prototype, css, styles]
+*/
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  color: #1f2933;
+}
+
+header {
+  padding: 1rem 2rem;
+  background: #0b5fff;
+  color: #fff;
+}
+
+main {
+  padding: 2rem;
+}

@@ -1,0 +1,14 @@
+# version: 0.1.0
+# tags: [config, urgency, delay, yaml]
+
+# How late a delayed slot may be before the agent hands off instead of proposing it.
+# Job types reference a tier in qualifications.yaml; a job record can override its tier.
+# null means any time until the end of the working day. Example values only.
+
+tiers:
+  emergency:
+    max_delay_minutes: 60
+  standard:
+    max_delay_minutes: 240
+  flexible:
+    max_delay_minutes: null
