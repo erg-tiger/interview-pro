@@ -1,0 +1,36 @@
+<!--
+version: 0.2.0
+tags: [artifact, template, html, layout]
+-->
+<!-- Layout only. Text comes from content/artifact.yaml; build with: node docs/build.mjs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>{{title}}</h1>
+    <p>{{subtitle}}</p>
+  </header>
+  <div class="layout">
+    <nav aria-label="Sections">
+      <ol>
+{{nav}}
+      </ol>
+    </nav>
+    <main>
+{{content}}
+    </main>
+  </div>
+  <footer>
+    <p>{{data_notice}}</p>
+    <p>{{prototype_note}}</p>
+  </footer>
+  {{scripts}}
+</body>
+</html>

@@ -1,0 +1,304 @@
+version: 0.12.0
+tags: [artifact, content, yaml]
+
+# Single source of text for the product artifact (docs/index.html). Layout lives in the template, not here.
+# Rebuild after editing: node docs/build.mjs
+#
+# Block types (each block is one key):
+#   p:        paragraph text
+#   h:        subsection heading
+#   bullets:  list of strings
+#   steps:    numbered list of strings
+#   table:    { columns: [..], rows: [[..], ..] }
+#   callout:  { kind: weak_spot | note, text: ".." }   # weak_spot = honest caveat, always rendered visibly
+#   mermaid:  { caption: "..", source: | ... }          # diagram; loads a pinned Mermaid script, source stays readable if it fails
+#
+# Inline markup inside any text (always quote the string):
+#   **bold**   *italic*   __underline__   `code`
+#   {ok|text} green   {warn|text} amber   {bad|text} red   {info|text} blue
+#
+# "source" names where the detail lives (plan section or decision record).
+# Write condensed, presentation-ready text here; do not copy the plan.
+
+meta:
+  title: Same-day scheduling agent
+  subtitle: A dispatcher's agent for day-of-service disruptions
+  data_notice: Prototype with synthetic data only. Figures are invented unless stated.
+  prototype_note: The prototype runs locally and is demonstrated live; this page is the written artifact.
+
+sections:
+  - id: glance
+    title: At a glance
+    source: summary of the sections below
+    blocks:
+      - bullets:
+          - "**Problem:** when something changes mid-day, a dispatcher re-plans by hand. I built for the *technician call-out*."
+          - "**What I built:** the model proposes a plan, __code checks it is safe__, and the dispatcher approves, switches or undoes it. A Settings button sets how much the agent may do alone (**Never, Recommended or Always**) and whether it optimizes **job revenue or drive time**."
+          - "**Why an AI model, not rules:** free-text notes, moves that affect other jobs, and a different goal per business. Rules still do the safety work."
+      - table:
+          columns: [What the case asks for, Where it stands]
+          rows:
+            - ["Agent decision, action, and an approval or failure path", "{ok|Built} Run live: S1, S2, S4, S5, S6, S7, S10."]
+            - ["What it can do on its own vs. needs approval", "{ok|Built} Settings button (Never, Recommended, Always)."]
+            - ["Trust: inspect, undo, recover", "{ok|Built} Reasoning, alternatives, safety checks, one-click undo, hand-off with a reason."]
+            - ["Which technicians are qualified for a job", "{warn|Partial} Configurable in a file, not on a screen."]
+            - ["Different workflows by industry", "{warn|Partial} Settings choose Job revenue or Drive time; the one drive-distance run was inconclusive."]
+            - ["Test set of 5 to 8 scenarios, including a failure", "{ok|Done} Ten defined, seven run live, two failure cases."]
+            - ["Outside references", "{bad|Thin} None cited; only my own review of the existing calendar."]
+      - h: Biggest weak spots
+      - bullets:
+          - "Confidence is the model's own number, not calibrated, and a low-rated job can still run automatically if the overall plan scores well."
+          - "No dispatcher was consulted; the pain points and scores are my hypotheses."
+          - "Only one of the three disruption types is built, on one industry's data."
+      - h: What I would do next
+      - bullets:
+          - "Talk to dispatchers, then build settings screens for qualifications, add a route-based dataset, and test the agent against a rules engine."
+
+  - id: problem
+    title: The customer problem
+    source: PLAN.md Phase 1; decision 0004; decision 0012
+    blocks:
+      - bullets:
+          - "**Who:** an office manager or dispatcher at a home service business with __7 to 10 technicians__."
+          - "**Pain:** when a job runs long, a technician calls out, or a customer reschedules, they *re-plan the day by hand*. They work out who is qualified and free, how far each person must travel, which job to protect, and who to tell, while the phone keeps ringing."
+          - "**Anchor:** on-demand trades (plumbing, HVAC), where qualifications limit who can cover a job and a lost job is costly. Route-based businesses (cleaning, pool) are the same problem with a different goal, which the agent takes as configuration."
+      - table:
+          columns: ["", "What it looks like"]
+          rows:
+            - ["{ok|Good}", "The day is settled quickly. High-value and urgent jobs are covered by qualified technicians. The dispatcher only makes the decisions that matter and can *see why* each change was made."]
+            - ["{bad|Failure}", "A job is left uncovered and nobody notices. An unqualified technician is sent. A customer's time changes without a warning. The dispatcher cannot tell what the agent did or cannot undo it."]
+      - bullets:
+          - "**What I built for:** the technician call-out."
+          - "**Why:** I scored the three disruptions on frequency, severity and business outcome: **call-out 8**, job running long 7, reschedule 5."
+          - "A call-out hits several jobs at once and forces the hard parts: qualification, delay versus hand-off, and a natural failure case. The same reasoning carries over to the other two."
+      - callout: { kind: weak_spot, text: "The scores and the pain points behind them are __my hypotheses__. I did not talk to a dispatcher or cite a source, and frequency is the least reliable score. The call-out was also chosen for how well it demonstrates the agent, not only for pain." }
+
+  - id: assumptions-scope
+    title: Assumptions and scope
+    source: PLAN.md Confirmed vs. assumed; assumptions register A1 to A8; decision 0012
+    blocks:
+      - bullets:
+          - "{ok|Confirmed} it comes from the case or was decided by me."
+          - "{warn|Assumed} it is a hypothesis I have not checked."
+      - table:
+          columns: [Item, Status, Note]
+          rows:
+            - ["Focus user: dispatcher at a business with 7 to 10 technicians", "{ok|Confirmed}", "From the case"]
+            - ["The agent must let users set autonomy, approvals and technician qualifications", "{ok|Confirmed}", "From the case"]
+            - ["Industries differ: drive distance for cleaning and pool, revenue for plumbing and HVAC", "{ok|Confirmed}", "The case states the pattern; the mapping to defaults is mine"]
+            - ["Scope is the technician call-out only", "{ok|Confirmed}", "My decision; job running long and customer reschedule are future work"]
+            - ["Moving a job to another qualified technician at the same time is low risk; delays and schedule changes need approval by default", "{ok|Confirmed}", "My product decision, with an Always setting for businesses that want fewer approvals"]
+            - ["The existing calendar has drag-and-drop editing, color coding and clear time blocks", "{ok|Confirmed}", "My own review of the product, not checked against documentation"]
+            - ["The eight friction points are real and in this form", "{warn|Assumed}", "Hypotheses; no dispatcher consulted"]
+            - ["On-demand disruptions are more frequent and harder than route-based", "{warn|Assumed}", "No source"]
+            - ["Technician and customer goals and fears", "{warn|Assumed}", "Least known personas; not researched"]
+            - ["Delay limits (60 and 240 minutes) and job values", "{warn|Assumed}", "Examples in synthetic data"]
+            - ["$2,250 of work at risk in the base scenario", "{warn|Assumed}", "Comes from invented data; not a market figure"]
+      - h: Scope
+      - bullets:
+          - "{ok|In scope} one end-to-end slice with synthetic data: an agent decision with reasoning, an action (automatic or after approval), and approval and failure paths."
+          - "{info|Simulated} integrations and customer messages."
+          - "{bad|Out of scope} a job running long, a customer reschedule, real Housecall Pro integrations, real data, authentication and production routing."
+      - callout: { kind: weak_spot, text: "Everything marked **Assumed** is unresearched. I would validate the friction points and frequency with dispatchers before relying on any of them." }
+
+  - id: shared-vs-configurable
+    title: What is shared and what is configurable
+    source: PLAN.md Scope for the prototype; decisions 0003, 0007, 0014, 0015, 0016
+    blocks:
+      - h: "{info|Shared} by every business"
+      - table:
+          columns: [Item, How it works]
+          rows:
+            - ["Reasoning steps", "Find affected jobs, check qualification, availability and travel, rank, then delay or hand off."]
+            - ["Safety checks", "Qualified, free, enough travel time, within the urgency limit, inside the workday. Done in code; the agent cannot bypass them."]
+            - ["Approval, undo, audit log, hand-off", "Every change can be approved or rejected, undone, and is logged. A hand-off always states its reason."]
+      - h: "{ok|Configurable} per business"
+      - table:
+          columns: [Item, How it is set today]
+          rows:
+            - ["Scheduling goal: job revenue or drive distance", "{ok|Settings panel}: Job revenue (plumbing, HVAC) or Drive time (cleaning, pool). The profiles are defined in a config file, which also sets the starting value."]
+            - ["Technician qualifications: required skills per job type, per-technician overrides", "Config file."]
+            - ["What each priority means: the ordered criteria and their definitions", "Config file; the definitions are sent to the model so it can name the deciding criterion."]
+            - ["How much the agent may do without approval: **Never**, **Recommended** or **Always**", "{ok|Settings button} in the dispatcher page."]
+            - ["Finer control per action type (reassign, delay, shift, cancel)", "Config file. The Settings choice overwrites it."]
+            - ["How late a job may start, by urgency tier (emergency 60 minutes, standard 240)", "Config file."]
+            - ["Confidence below which a plan always goes to the dispatcher", "Config file (0.7)."]
+      - callout: { kind: weak_spot, text: "Only the __autonomy level__ and the __scheduling priority__ are set from the page. Qualifications and urgency are config files, which is hard for a real dispatcher. The drive-distance priority exists but is only shown on plumbing and HVAC data, and the autonomy setting is one three-level choice, not per-action control." }
+
+  - id: solution
+    title: Solution design
+    source: PLAN.md Phase 3; decisions 0006, 0009, 0011, 0017
+    blocks:
+      - bullets:
+          - "**Goal:** cover the absent technician's jobs, optimizing the business's active goal (job revenue or drive time) within urgency limits."
+          - "**Context:** one prompt with the live schedule, technician skills and locations, travel minutes, qualification rules, urgency tiers, customer notes, the goal and what each of its criteria means, the permissions in effect and the dispatcher's note."
+          - "**Tools:** none at run time. The model returns a structured proposal (reassign, delay or hand off, with reasoning, assumptions, one alternative per job and a confidence). *Code* validates, applies, logs and undoes."
+          - "**Permissions:** set by the dispatcher through the autonomy level."
+      - mermaid:
+          caption: "From call-out to outcome. The model proposes; code checks, applies, logs and undoes."
+          source: |
+            flowchart TD
+              A["Dispatcher reports a call-out"] --> B["Code assembles the inputs: schedule, travel times, skills, goal, permissions"]
+              B --> C["Agent: one model call returns a proposal with reasoning, alternatives and confidence"]
+              C -->|"model error"| H["Hand off: reason shown, schedule unchanged"]
+              C --> V{"Safety checks: qualified, free, travel time, urgency, workday"}
+              V -->|"fails, first time"| R["One retry with the errors fed back"]
+              R --> V
+              V -->|"fails again"| H
+              V -->|"passes"| P{"Autonomy setting and confidence"}
+              P -->|"allowed and confident"| X["Apply, notify the customer, log"]
+              P -->|"needs approval or low confidence"| D["Dispatcher: approve, switch to an alternative, restore, or reject"]
+              D -->|"approve"| X
+              D -->|"reject"| N["No change, logged"]
+              X --> U["Undo available; every step in the audit log"]
+              H --> U2["Dispatcher takes over; logged"]
+      - h: What the agent does on its own, and when it stops
+      - table:
+          columns: [When, What happens]
+          rows:
+            - ["{ok|On its own} (Recommended)", "Move a job to another qualified, free technician at the same time. The customer is sent an update (simulated). Always logged and undoable."]
+            - ["{warn|Needs approval} (Recommended)", "A delayed start, a shifted job, or anything else that changes a customer's promised time. The dispatcher can approve, switch to the agent's alternative, restore the original, or reject."]
+            - ["{bad|Stops and hands off}", "No feasible option, confidence below 0.7, safety checks still failing after one retry, or a model error. The schedule is left unchanged and the reason is shown."]
+            - ["{bad|Never done}", "Cancelling a job."]
+      - h: The rule-based alternative
+      - bullets:
+          - "**The alternative:** a rules engine takes each affected job in priority order, assigns the best-ranked qualified technician from a skills table who is free for that slot, delays it to the first free qualified technician if none is, and flags it otherwise."
+          - "**Why the agent is better here:** free text cannot be encoded as rules (a note like *'not sure if I will be back by 2pm'*); moves interact (delaying an install pushes another technician's next job); each business has its own goal, which rules would need rewritten per business; and the agent explains its choice and offers alternatives."
+          - "**Where rules win:** cheaper, faster, predictable, and enough when one job has one obvious free technician. So the design is a __hybrid__: the model judges, and code guarantees safety, permissions, logging and undo."
+      - callout: { kind: weak_spot, text: "No head-to-head comparison against a rules engine was run. The argument for the agent rests on reasoning, not measurement. Also, customer notes and the dispatcher's note go into the prompt as untrusted text; the validator limits what a crafted note could do, but the text is not sanitized." }
+
+  - id: trust-failure
+    title: Trust and failure
+    source: PLAN.md Phase 4; decisions 0014, 0015
+    blocks:
+      - bullets:
+          - "**Inspect:** every job shows the agent's reasoning, confidence, assumptions, one alternative with its tradeoff, the safety-check results and what it was before. A one-line __plan impact__ (revenue covered, revenue handed back, drive minutes to reach the moved jobs) shows the effect of the chosen priority. The audit log records every proposal, automatic change, approval, rejection, undo and simulated customer message."
+          - "**Correct and undo:** before approving, switch a job to the agent's alternative, restore the original, approve the rest, or reject. After anything is applied, __one undo reverses the whole plan__, including the parts that ran on their own."
+      - h: Recovering when something goes wrong
+      - bullets:
+          - "{bad|Agent is wrong} the validator blocks unqualified, unavailable, too-tight or out-of-hours proposals, sends one correction back to the model, and hands the job to the dispatcher if that fails."
+          - "{warn|Agent is uncertain} a plan under the confidence threshold always waits for the dispatcher, and unclear notes are shown as stated assumptions."
+          - "{info|Tool or model fails} the schedule is left unchanged and the job is handed off with the reason. *Nothing fails silently.*"
+      - h: How trust builds over time
+      - bullets:
+          - "{warn|Designed, not built} record what the dispatcher does with each proposal (approved unchanged, switched, rejected, undone) and use it to move confidence thresholds per action type."
+          - "Where an action is reliably accepted, offer to raise it toward **Always**; where it is often undone, lower it. The dispatcher accepts each change."
+      - callout: { kind: weak_spot, text: "Confidence is the model's own number, __not calibrated__. A stated 90% does not mean right 90% of the time; the validator is the real guarantee. The gate also looks only at the plan's overall number: in S2 a job the model rated 0.6 was applied automatically. Learning from dispatcher decisions is slow with one dispatcher, approval can become a habit, and customer sentiment has no data source yet. Undo also leaves the technician marked as called out." }
+
+  - id: measurement
+    title: Measurement
+    source: PLAN.md Phase 4 outcome metrics and quality bar
+    blocks:
+      - h: Outcome metrics
+      - bullets:
+          - "**Dispatcher effort:** minutes from the call-out to a settled schedule, and calls or texts still made by hand."
+          - "**Customer and revenue:** jobs still completed the same day, revenue at risk that was covered, jobs lost, complaints about a changed technician or time."
+          - "**Business goal:** revenue covered (revenue priority) or drive minutes added (drive-time priority). The prototype already shows a __plan impact__ line for each proposal (revenue covered, revenue handed back, drive minutes to reach the moved jobs), computed in code."
+          - "**Agent quality, from dispatcher behavior:** proposals approved unchanged, switched, rejected or undone; hand-off rate; first attempts that fail the safety checks."
+          - "**Baseline needed:** the same measures for dispatchers handling disruptions by hand. *I do not have this.*"
+      - h: Quality bar before shipping
+      - table:
+          columns: [Area, Bar before shipping]
+          rows:
+            - ["Decisions", "**Zero** applied proposals that break qualification, availability, travel or urgency (guaranteed by the validator and checked on a replay set that includes failures). About **80%** accepted unchanged or after one switch. Acceptance clearly higher above the confidence threshold than below it."]
+            - ["Actions", "Every applied action is logged and undoable, and undo restores the schedule in every test. An automatic action type that is undone more than about **5%** of the time reverts to approval."]
+            - ["Handoffs", "Every hand-off states a reason and none is silent. Neither too many nor missing where no option fits, spot-checked by a dispatcher."]
+            - ["Rollout", "Shadow mode first (proposals shown, nothing applied), then Recommended for a few businesses, and Always only where the record supports it."]
+      - callout: { kind: weak_spot, text: "Nothing here is measured; the data is synthetic. The 80% and 5% thresholds are __my placeholders__, to be set against a real baseline." }
+
+  - id: scenarios
+    title: Test scenarios
+    source: PLAN.md Test scenarios S1 to S10; prototype/config/scenarios.yaml
+    blocks:
+      - bullets:
+          - "All scenarios are call-outs against the synthetic day. S1 to S8 use Dana (plumbing and gas-certified, out from 10:30); S9 and S10 use other technicians. They are defined in a config file, not in code. The expected result is a hypothesis checked against the real agent, not an exact output."
+          - "{ok|Run live} means I ran it through the dispatcher page with the real model."
+      - table:
+          columns: [ID, Scenario, Expected, Result]
+          rows:
+            - ["S1", "Base call-out, revenue profile", "The $1,850 install goes to a qualified technician in a later slot within the limit. The drain and faucet jobs are reassigned.", "{ok|Run live} The two reassignments (J6, J7) applied on their own with a simulated customer update. The install (J5) went to Aisha 79 minutes late and her toilet repair (J12) shifted, both waiting for approval. Approved, then undone."]
+            - ["S2", "Same call-out, drive-distance profile", "At least one choice differs from S1, driven by proximity.", "{warn|Run live, inconclusive} The plan differed from S1 (J7 went to Ben, J12 moved to Priya), but both changes added drive time and the agent explained them by a scheduling conflict, not proximity. One run cannot separate the profile from the model's run-to-run variation."]
+            - ["S3", "The business approves every change", "Even simple reassignments wait for approval.", "{bad|Not run live} Covered by a unit test of the permission logic."]
+            - ["S4", "{bad|Failure}: nobody qualified and free in time", "The install is handed off with the reason; the other jobs are still proposed.", "{ok|Run live} The install (J5) was handed off with the reason: no qualified technician could start inside the 60-minute emergency limit. J6 and J7 were still reassigned. The urgency-limit check is also unit tested."]
+            - ["S5", "{bad|Failure}: the first proposal is unsafe (injected)", "The validator rejects it, one retry, then hand-off if it fails again.", "{ok|Run live} The injected unsafe plan was rejected and the agent returned a valid plan on the retry. The injection is a test fixture, not a model mistake."]
+            - ["S6", "Ambiguous note", "The agent states its assumption and lowers confidence.", "{ok|Run live} The agent took the cautious reading (Dana out all day) and stated it as an assumption. Overall confidence was 0.65, below the 0.7 threshold, so every change waited for approval, including the simple reassignments. It did not use the 'maybe by 2pm' hint."]
+            - ["S7", "Approve then undo", "The schedule returns to its original state and the log shows both steps.", "{ok|Run live} (as part of S1) Undo restored the schedule; the technician stayed marked as called out."]
+            - ["S8", "Choose an offered alternative", "The alternative shows its tradeoff, passes validation, and the choice is logged.", "{warn|Built, not run live}"]
+            - ["S9", "HVAC specialist out", "Only two other HVAC technicians, both with jobs nearby in time: a reassignment, delay or hand-off with a reason.", "{bad|Not run live}"]
+            - ["S10", "Easy day, one drain job", "A single reassignment that runs without approval.", "{ok|Run live} The drain job went to Aisha and applied on its own with a customer update (confidence 0.9, about 6K tokens). The plan-impact line showed $230 covered and 27 drive minutes, and the rationale named the deciding criterion."]
+      - callout: { kind: weak_spot, text: "**S1, S2, S4, S5, S6, S7 and S10** ran end to end. **S3, S8 and S9** did not, though the safety checks and permission logic have 17 passing unit tests. A model-failure hand-off is coded but was never triggered. Every result is from synthetic data and a single run of a non-deterministic model." }
+
+  - id: references
+    title: Outside references
+    source: author's own review (no external research was done for this artifact)
+    blocks:
+      - p: "I reviewed Housecall Pro's *existing calendar product* and what it does today. This is the **only research** done; it is a first-hand observation, not checked against official documentation."
+      - bullets:
+          - "**Drag-and-drop editing:** a dispatcher can already move a job by hand. The agent works alongside this, so a dispatcher can still adjust anything it proposes."
+          - "**Color coding** by several dimensions, such as employee."
+          - "**Clear time blocks** for jobs."
+      - p: "The prototype's day view shows one row (__swimlane__) per technician instead of color coding by employee, so each technician's day and the agent's moves are easier to see. This is a prototype visualization choice, not a claim about the real product."
+      - callout: { kind: note, text: "No outside sources were researched or cited. The friction points, personas and scores in this artifact are hypotheses." }
+
+  - id: approach
+    title: How I approached it
+    source: product-artifact/TIMELINE.yaml; product-artifact/decisions
+    blocks:
+      - steps:
+          - "**Framing:** started from the case's persona (a dispatcher with 7 to 10 technicians), listed the jobs to be done and friction points, and scored the three disruptions to pick one. Everything in this step is a hypothesis."
+          - "**Research:** my own review of the existing Housecall Pro calendar product. No outside sources."
+          - "**AI in planning:** I used it to draft personas, requirements and design options, and the model runs the scheduling itself. I pushed back when the first requirements described demo mechanics instead of the product, and when it ranked by proximity first, which contradicted the case's revenue goal."
+          - "**Design pivots:** from a tool-calling agent to a single call with all inputs in the prompt, which is simpler and cheaper; and to a small model with low thinking to save tokens."
+          - "**My judgment calls:** anchor on on-demand trades; build only the call-out; moving a job to another qualified technician is low risk but delays need approval; add an *Always* level for businesses that want fewer approvals; make the industry priority (revenue or drive time) a Settings choice; learn confidence thresholds from dispatcher decisions as the trust story."
+      - p: "Each design choice is written down as a short decision record, and each milestone is logged in a timeline."
+
+  - id: ai-usage
+    title: How AI was used
+    source: product-artifact/TIMELINE.yaml (ai_usage fields)
+    blocks:
+      - h: Tools used
+      - table:
+          columns: [Tool, Used for, Rationale]
+          rows:
+            - ["GitHub Copilot in VS Code", "Planning, drafting the plan, decision records and this page, writing and testing the prototype code, and checking it in a browser.", "It works inside the editor with access to the repository, terminal and browser, so one tool covered planning, code, tests and checks. It is included in my existing license, so it needed no extra budget."]
+            - ["Pi coding-agent SDK, using my GitHub Copilot login", "The model that proposes the schedule inside the prototype (a small Claude model, low thinking).", "I have no personal API budget, so I used the model access in my Copilot license. Pi runs it inside the app without extra keys, and a small model with low thinking keeps cost and wait time down."]
+      - h: Where AI was wrong
+      - steps:
+          - "It ranked by **proximity first** in both goal profiles, which contradicted the case's revenue requirement. I caught it."
+          - "It offered **GitHub Models** as the provider without checking; a docs check showed that service was shut down."
+          - "Its first requirements described **demo mechanics**, not product behavior, until I redirected it."
+          - "It **guessed two vendor URLs** that returned 404, so I cited no sources instead of unverified ones."
+          - "A prompt edit **overwrote the conciseness instruction**; a text search caught it before any run."
+          - "**Undo left a technician marked as called out**, found only when running scenarios, not by the tests."
+          - "While filling in the scenarios table, **one of its edits silently swallowed the start of a table row** and broke the YAML. I found it by searching the file and had it fixed."
+      - h: What I did without AI
+      - steps:
+          - "**The API key and login:** I created the key and set it up locally myself, and ran the model login with my own account, *so the secret never passed through chat*."
+          - "**The calendar product review:** I looked at the existing product myself; it is the only research here and needs a person's view of the real product."
+          - "**The product calls on risk, scope and autonomy:** reassignment is low risk, delays need approval, and the Always level. These define what the product is willing to risk, so they are my judgment."
+          - "**Whether the data covered both industries:** I asked, catching a gap the assistant had not raised."
+          - "**The trust idea:** learning confidence thresholds from dispatcher decisions, and the level names Never, Recommended and Always."
+          - "**The token budget:** I set the limit on model runs and chose the cheap options (a plan-impact line, scenarios in a file) over a new dataset and repeated runs."
+      - callout: { kind: note, text: "The timeline in the repository records each of these with the milestone where it happened." }
+
+  - id: limitations
+    title: Limitations and enhancements
+    source: PLAN.md Future enhancements; PLAN.md Phase 4 gaps
+    blocks:
+      - h: "{bad|Limitations}"
+      - bullets:
+          - "Only the **technician call-out** is built; a job running long and a customer reschedule reuse the same reasoning but are not done."
+          - "Only the **autonomy level** and **scheduling priority** are dispatcher settings. Qualifications and urgency are config files, and autonomy is one three-level choice, not per action."
+          - "All data is plumbing and HVAC, so the **drive-time priority** can be chosen but is not shown on a recurring-service business."
+          - "Three of the ten scenarios (S3, S8, S9) were **not run live**, the drive-distance profile's effect was inconclusive (S2), nothing was measured, and confidence is uncalibrated."
+          - "Customer messages and integrations are **simulated**; the prototype runs locally on synthetic data. Undo does not restore a technician's called-out status."
+          - "The plan-impact figure counts only the drive into the moved jobs, not total route length."
+          - "There is **no fallback model**: if the live call fails, the prototype hands off. As a demo safety net, a __replay mode__ plays back three recorded real runs (S1, S5, S10); the safety checks, approval and undo still run live, and the screen is labeled as a recording."
+      - h: "{ok|Enhancements}"
+      - bullets:
+          - "**Validate:** talk to dispatchers to check the friction points, and gather a manual baseline for the metrics."
+          - "**Settings:** a screen for qualifications and per-action permissions."
+          - "**Second dataset** for a route-based business, to show the drive-distance profile."
+          - "**Messages and editing:** drafted messages for delayed jobs; editing a proposal freely."
+          - "**More disruptions:** a job running long and a customer reschedule."
+          - "**Prove it:** a head-to-head test against a rules engine, then shadow mode, then learned confidence thresholds."

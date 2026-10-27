@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "tags": ["data", "synthetic", "jobs", "json"],
+  "jobs": [
+    { "id": "J1", "customer_id": "C1", "type": "Drain cleaning", "address": { "label": "9 Harbor St", "x": 12, "y": 7 }, "start": "13:00", "end": "14:00", "assigned_to": "T1", "status": "scheduled", "value_usd": 230 },
+    { "id": "J2", "customer_id": "C2", "type": "Drain cleaning", "address": { "label": "88 Maple Ct", "x": 6, "y": 14 }, "start": "09:30", "end": "11:15", "assigned_to": "T2", "status": "in_progress", "value_usd": 260 },
+    { "id": "J3", "customer_id": "C3", "type": "Faucet repair", "address": { "label": "20 Elm Pl", "x": 7, "y": 15 }, "start": "12:00", "end": "13:00", "assigned_to": "T2", "status": "scheduled", "value_usd": 190 },
+    { "id": "J4", "customer_id": "C4", "type": "Drain cleaning", "address": { "label": "19 Orchard Rd", "x": 9, "y": 12 }, "start": "08:00", "end": "09:45", "assigned_to": "T3", "status": "completed", "value_usd": 240 },
+    { "id": "J5", "customer_id": "C5", "type": "Water heater install", "address": { "label": "250 Lakeview Dr", "x": 13, "y": 15 }, "start": "11:00", "end": "14:00", "assigned_to": "T3", "status": "scheduled", "value_usd": 1850 },
+    { "id": "J6", "customer_id": "C6", "type": "Drain cleaning", "address": { "label": "77 Pine Row", "x": 11, "y": 8 }, "start": "14:30", "end": "15:30", "assigned_to": "T3", "status": "scheduled", "value_usd": 220 },
+    { "id": "J7", "customer_id": "C7", "type": "Faucet repair", "address": { "label": "5 Willow Way", "x": 16, "y": 12 }, "start": "15:45", "end": "16:45", "assigned_to": "T3", "status": "scheduled", "value_usd": 180 },
+    { "id": "J8", "customer_id": "C8", "type": "AC repair", "address": { "label": "14 Dockside Rd", "x": 15, "y": 6 }, "start": "09:00", "end": "12:00", "assigned_to": "T4", "status": "in_progress", "value_usd": 480 },
+    { "id": "J9", "customer_id": "C9", "type": "Furnace tune-up", "address": { "label": "3 Seabreeze Ln", "x": 18, "y": 4 }, "start": "13:30", "end": "14:30", "assigned_to": "T4", "status": "scheduled", "value_usd": 150 },
+    { "id": "J10", "customer_id": "C10", "type": "AC repair", "address": { "label": "61 Cedar Ln", "x": 5, "y": 6 }, "start": "14:00", "end": "16:00", "assigned_to": "T5", "status": "scheduled", "value_usd": 420 },
+    { "id": "J11", "customer_id": "C11", "type": "Water heater repair", "address": { "label": "31 Birch Ave", "x": 12, "y": 16 }, "start": "09:15", "end": "12:15", "assigned_to": "T6", "status": "in_progress", "value_usd": 620 },
+    { "id": "J12", "customer_id": "C12", "type": "Toilet repair", "address": { "label": "12 Aspen Ct", "x": 7, "y": 3 }, "start": "15:00", "end": "16:00", "assigned_to": "T6", "status": "scheduled", "value_usd": 240 },
+    { "id": "J13", "customer_id": "C13", "type": "Sewer line repair", "address": { "label": "402 Quarry Rd", "x": 3, "y": 17 }, "start": "08:30", "end": "13:30", "assigned_to": "T7", "status": "in_progress", "value_usd": 2400 },
+    { "id": "J14", "customer_id": "C14", "type": "Furnace tune-up", "address": { "label": "47 Summit Dr", "x": 19, "y": 14 }, "start": "15:30", "end": "16:30", "assigned_to": "T8", "status": "scheduled", "value_usd": 160 }
+  ]
+}

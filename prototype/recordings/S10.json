@@ -1,0 +1,61 @@
+{
+  "version": "0.1.0",
+  "tags": [
+    "recording",
+    "replay",
+    "synthetic"
+  ],
+  "scenario": "S10",
+  "recorded_at": "2026-10-27T18:55:43.716Z",
+  "model": "github-copilot/claude-haiku-5.5",
+  "thinking": "low",
+  "priority": "job_revenue",
+  "result": {
+    "proposal": {
+      "summary": "Marcus's only affected job is J1 (drain cleaning, 13:00-14:00). Plumber Aisha Khan (T6) can reach 9 Harbor St from her 31 Birch Ave job by 12:42 and keep the 13:00 slot with no revenue at risk, so this is a reassignment with no delay and no side effects.",
+      "overall_confidence": 0.9,
+      "assumptions": [
+        "J1 is the only job Marcus (T1) loses; his other jobs are none, and J1 is the only T1 job in the data.",
+        "T6 finishes J11 at 12:15 as scheduled, despite the property manager being on site.",
+        "Travel from J11's location (31 Birch Ave) to J1 is 27 minutes, per the travel_minutes matrix."
+      ],
+      "side_effects": [],
+      "jobs": [
+        {
+          "job_id": "J1",
+          "outcome": "reassign",
+          "technician_id": "T6",
+          "new_start": "13:00",
+          "new_end": "14:00",
+          "rationale": "Urgency ties at standard, so job revenue decides the order; T6 is the only qualified technician who can keep the 13:00 slot, arriving at 12:42. On the revenue_protected criterion, T6 puts no revenue at risk because the next job (J12 at 15:00) still starts after the 14:19 return from J1.",
+          "confidence": 0.9,
+          "handoff_reason": null,
+          "alternatives": [
+            {
+              "outcome": "delay",
+              "technician_id": "T2",
+              "new_start": "13:28",
+              "new_end": "14:28",
+              "tradeoff": "Priya finishes J3 at 13:00 and needs 28 minutes to reach Harbor St, so J1 slips 28 minutes; this is within the standard 240-minute limit but disrupts the customer for no benefit."
+            }
+          ]
+        }
+      ]
+    },
+    "attempts": [
+      {
+        "n": 1,
+        "injected": false,
+        "errors": []
+      }
+    ],
+    "seconds": 9.8,
+    "tokens": {
+      "input": 4,
+      "output": 1951,
+      "cacheRead": 0,
+      "cacheWrite": 4437,
+      "total": 6392
+    }
+  }
+}

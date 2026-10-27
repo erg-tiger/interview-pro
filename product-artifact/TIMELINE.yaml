@@ -1,4 +1,4 @@
-version: 0.5.0
+version: 0.18.0
 tags: [timeline, process, product-artifact, ai-usage]
 
 # Purpose: a running log of work completed. For now its sole use is to populate the product artifact.
@@ -85,6 +85,259 @@ beats:
       done_without_ai: null
     artifact_sections: [solution-design, trust-and-failure]
     links: [PLAN.md, product-artifact/decisions, docs/config, prototype/spike.mjs]
+
+  - id: beat-004
+    date: 2026-10-27
+    title: LLM provider spike showed the design works but the free tier is unreliable
+    summary: Ran a tool-calling and structured-output spike against the Gemini free tier. The agent pattern worked, but availability and latency were poor, so the provider path and demo plan were adjusted.
+    outcomes:
+      - Tool calling and valid JSON confirmed on Gemini through an OpenAI-compatible endpoint.
+      - gemini-3.8-flash failed on 8 of 9 attempts (503 or timeout); gemini-2.5-flash was closed to new users.
+      - Retry with backoff and model fallback made the scenario succeed, at 145 seconds end to end.
+      - Plan set to test Pi with a Copilot login as an alternative runtime and to keep recorded traces for local replay as demo insurance (0010).
+    why_it_matters: A live demo that stalls costs more than a less-live demo. Finding this early, and treating model unavailability as a designed failure path with retry, fallback, and handoff, strengthens the trust and failure story.
+    decisions:
+      - Keep a provider-neutral interface so providers are configuration, not code (0010).
+      - Test Pi with Copilot, timeboxed, behind the same adapter, despite the assistant's reservations.
+      - Record traces for local replay as a demo safety net.
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Wrote the spike and the retry and fallback logic, researched provider docs, and analyzed results.
+      ai_was_wrong: Assumed the Gemini free tier would be reliable enough, which the results contradicted. The first fallback version also retried the failing model on every call, wasting most of the 145 seconds. The assistant also advised against the Pi test; the author overruled it, and the test will show who was right.
+      done_without_ai: The author created the API key and pasted it into the local .env file personally, so the key never passed through chat. The author also logged into Pi with her own Copilot license.
+    artifact_sections: [solution-design, trust-and-failure]
+    links: [prototype/spike.mjs, product-artifact/decisions/0010-llm-provider-and-reliability.md]
+
+  - id: beat-005
+    date: 2026-10-27
+    title: Pi with a Copilot login streams tokens from a baby Node app
+    summary: Validated only the runtime question: can a small Node app stream model tokens through Pi's SDK using the author's Copilot license. Scheduling quality was deliberately not tested.
+    outcomes:
+      - Pi SDK installed locally and called in-process, avoiding the PowerShell launcher block.
+      - A script and a localhost-only server streamed tokens over server-sent events from a Copilot model, with all tools, extensions, skills, and context files disabled.
+      - First token about 1 second and total about 1.2 seconds for short replies; the same Gemini model that failed on the free tier answered in about 2 seconds through Copilot.
+      - A browser page opened from the local server streamed a reply from the Copilot model (first token 994ms, 20 chunks, 1.3s total), confirming the path the prototype UI will use.
+    why_it_matters: The earlier free-tier results made a live demo risky. A reliable runtime lets the agent run live, with recorded traces kept only as a safety net.
+    decisions:
+      - "Chose Pi with the author's Copilot login as the primary live runtime. Why: (1) evidence, since the Gemini free tier failed 8 of 9 attempts while Copilot answered every test in 1.4 to 2 seconds; (2) no extra cost or new key, which was a stated constraint; (3) Pi's SDK runs in-process, so there is no subprocess or launcher to manage, and tools, extensions, skills, and context files can be disabled; (4) token streaming works natively, which suits the live demo; (5) the provider-neutral interface is kept, so Gemini, another provider, or recorded traces remain fallbacks."
+      - "Accepted trade-offs: it depends on the author's personal login so reviewers need their own provider, Pi is a young and fast-moving dependency, npm audit flagged 2 vulnerabilities in its dependencies, and Copilot usage limits are unverified."
+      - Keep the test narrow after the author pushed back on solving the scheduling problem too early; JSON reliability and larger prompts are still to be tested (0010).
+    ai_usage:
+      tools: [GitHub Copilot, Pi]
+      purpose: Wrote the streaming script and server, read Pi's SDK types to find the options that disable tools, and verified guards with test requests.
+      ai_was_wrong: Jumped ahead by proposing to build the scheduling prompt and synthetic data before the runtime question was answered; the author redirected to a narrow test.
+      done_without_ai: The author chose to test Pi with her own Copilot login and ran the login herself.
+    artifact_sections: [solution-design, trust-and-failure]
+    links: [prototype/pi-stream.mjs, prototype/server.mjs, product-artifact/decisions/0010-llm-provider-and-reliability.md]
+
+  - id: beat-006
+    date: 2026-10-27
+    title: Phase 1 (customer) completed as explicit hypotheses
+    summary: Finished the customer phase of the plan with friction points and a scored prioritization, and labelled everything unsourced as an assumption with a plan to firm it up.
+    outcomes:
+      - Eight friction points tagged by type (effort, trust, confusion, delay) and mapped to the jobs to be done.
+      - Disruptions scored on frequency, severity, and business outcome; the technician call-out ranked first (8 of 9).
+      - Phase 1 assumptions register (A1 to A8) with confidence and how to firm each up.
+      - Synthetic data (8 technicians, 14 jobs, 14 customers) built around a base call-out scenario with deliberate traps.
+    why_it_matters: The case grades problem framing first. With no first-hand dispatching experience, naming assumptions and their confidence honestly is more defensible than presenting guesses as findings.
+    decisions:
+      - Present scores and personas as hypotheses and say the call-out was chosen on pain plus demo value.
+      - Do not guess outside sources; firm up with real references or a dispatcher conversation if time allows.
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Drafted the friction points, scoring, assumptions register, and synthetic data. The author reviewed and accepted them as hypotheses.
+      ai_was_wrong: Guessed two vendor URLs for outside sources and both returned 404, so no sources were cited instead of citing unverified ones.
+      done_without_ai: null
+    artifact_sections: [problem-framing, scenarios]
+    links: [PLAN.md, prototype/data/README.md]
+
+  - id: beat-007
+    date: 2026-10-27
+    title: Requirements rewritten as product requirements, independent of the demo
+    summary: Narrowed the prototype to technician call-outs, then rewrote the requirements to describe what the agent must do as a product, with demo mechanics kept in a separate list and future work listed as enhancements for the artifact.
+    outcomes:
+      - Fourteen product requirements with acceptance criteria across intake, decide and propose, configuration, control, failure, and audit (including edit before approval and alternatives with tradeoffs).
+      - Six future enhancements for the artifact (approval rates, notifications, outcome metrics, interactive re-planning, other disruption types, displacement).
+      - Prototype coverage and demo mechanics separated from requirements; eight call-out scenarios, including choosing an offered alternative.
+    why_it_matters: The case asks for an agent that works across industries and customers with configurable autonomy. Requirements tied to demo mechanics would not show that; product-level requirements let the artifact describe the full product while the prototype proves one slice.
+    decisions:
+      - Scope the prototype and demo to technician call-outs only (0012).
+      - Alternatives with tradeoffs and edit-before-approve are requirements; in the prototype they are simulated from the model's own alternatives, with interactive re-planning as a future enhancement.
+      - Keep a read-only day view and cut drag and drop and any attempt to mimic the exact Housecall Pro calendar.
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Drafted the requirements, acceptance criteria, scenarios, and the scope boundary. The author set the scope and decided what counts as a future enhancement.
+      ai_was_wrong: Wrote the first requirements around demo mechanics (YAML reload, an injected bad proposal, a specific input form) instead of what the product must do. The author pushed back, citing the case's emphasis on an agent that works across industries and customers with configurable autonomy, and the requirements were rewritten. The assistant also had to be corrected earlier when proximity-first ranking contradicted the case's revenue requirement.
+      done_without_ai: The author decided which requirements belong to the product artifact as future enhancements, and added edit-before-approve and alternatives with tradeoffs.
+    artifact_sections: [solution-design, scenarios]
+    links: [PLAN.md, product-artifact/decisions/0012-scope-technician-call-out-only.md]
+
+  - id: beat-008
+    date: 2026-10-27
+    title: First real agent proposals from the synthetic data, and what they exposed
+    summary: Built an exploratory script that assembles a prompt from the synthetic data and config, makes one model call through Pi on Copilot, and checks the structured proposal. Compared thinking levels and two models, and used the results to tighten the output format and the validator guarantees.
+    outcomes:
+      - "Valid JSON covering all three affected jobs on 4 of 5 runs; the fifth (Sonnet with thinking off) returned an empty response in 0.7 seconds and the cause is unconfirmed."
+      - "Strong reasoning: the agent separated Chloe (gas-certified, not a plumber) and Ben (plumber, not gas-certified) from Aisha, the only qualified technician for the $1,850 install, then proposed a delayed slot within the urgency limit and flagged the collision with Aisha's 15:00 job."
+      - "Latency: haiku with low thinking 26.2s (an earlier run 28.8s), minimal 24.2s, off 8.2s; sonnet with low thinking 20.7s. Only turning thinking off changed speed materially, and it produced three real errors (ignored travel time, an infeasible 15:45 start, and an unresolved collision)."
+      - "Runs differ: the faucet repair went to Marcus in one run and Priya in another, both valid."
+      - "Format changes: added side_effects for jobs that move because of the plan, required an end time on alternatives, and added a technician to side effects after a run could only mention a reassigned job in prose."
+      - "Validator extended with travel-aware gaps between jobs and a check that every collision the plan creates is resolved by a listed side effect (0009)."
+      - "Process diagram added to the plan."
+    why_it_matters: The case asks why an agent beats a rule-based approach. These runs show judgment a rules engine would struggle with, such as qualification traps, ripple effects on other jobs, and explaining tradeoffs. They also show why code guardrails are needed, since the fastest setting produced plausible but wrong plans.
+    decisions:
+      - Use low thinking for the demo and make the 20 to 30 second wait visible in the UI; thinking off is not acceptable for quality.
+      - Add travel-aware gaps and side-effect completeness to the validator.
+      - Expect run-to-run variation; keep recorded traces of good runs as a backup.
+      - Build a second small dataset for a recurring-service business after the core works, so the configurable-goal claim is demonstrated on a real second industry (open).
+    ai_usage:
+      tools: [GitHub Copilot, Pi]
+      purpose: Wrote the exploratory agent script and ran the comparisons; the author directed which tests to run and what to keep.
+      ai_was_wrong: "Predicted that trimming the prompt would help speed; latency barely moved, because thinking time dominated. The test script also hid a failed call by printing invalid JSON instead of the real error, which contradicts the requirement that failures never be silent. The assistant had not flagged that the data covers only the revenue-driven industry until the author asked."
+      done_without_ai: "The author asked whether the data covered both industry types, catching a gap the assistant had not raised, and decided to log the findings as a milestone."
+    artifact_sections: [solution-design, trust-and-failure, measurement]
+    links: [prototype/agent-run.mjs, product-artifact/decisions/0009-llm-agent-with-read-only-tools.md, PLAN.md]
+
+  - id: beat-009
+    date: 2026-10-27
+    title: Validator and dispatcher UI built; first call-out run end to end
+    summary: Built the code guardrails with unit tests, the agent module with a token-lean prompt and one retry, a localhost server holding the schedule, permissions, approval, undo, and audit log, and a dispatcher page with a day view. Ran the base call-out through it from proposal to approval to undo.
+    outcomes:
+      - "Validator with 10 passing unit tests, including the real failures seen in earlier runs: an unqualified technician, a missing job, a start that ignored travel time, an unresolved collision, a delay past the urgency limit, and a forbidden action."
+      - "Permission modes decide whether a plan applies automatically or waits; low confidence always waits for a human."
+      - "Dispatcher page: call-out form with scenario presets, day view with dashed proposed moves, proposal card with reasoning, alternatives with tradeoffs, safety-check results, inputs given to the agent, approve, reject, restore, undo, and a handoff tray."
+      - "End to end on the base call-out: the agent proposed in 19.1s with one attempt, the plan covered all three jobs plus a side effect, approval applied four job changes, and undo restored the schedule."
+      - "Token accounting per proposal is shown in the UI and the log: about 4.2K output tokens on the run, which supports keeping thinking low (0013)."
+    why_it_matters: This is the first time the requirements for control and trust exist in running software. The model proposes, code decides what is safe, and the dispatcher stays in charge with a visible, undoable audit trail.
+    decisions:
+      - "A plan applies automatically only when every action in it is autonomous and confidence is high; the strictest action decides (prototype simplification; per-action approval is a future enhancement)."
+      - "Undo restores the schedule but not the technician's call-out status, which resets with the day."
+      - "The local server only listens on 127.0.0.1 and rejects cross-origin and non-JSON writes, because it uses the author's Copilot login."
+      - "Token optimization (0013): compact prompt, thinking kept on at low, small model by default, one retry in the same session."
+    ai_usage:
+      tools: [GitHub Copilot, Pi]
+      purpose: Wrote the validator, tests, agent module, server, and UI; verified through unit tests, syntax checks, and a live run in the integrated browser.
+      ai_was_wrong: "Several first drafts failed on contact: a default import that the YAML library does not provide, a test command that Node did not accept for a directory, and a missing parenthesis in the UI script. The unit tests and syntax checks caught them before the demo. The token display also first reported 4 input tokens because cached input is counted separately, and had to be corrected."
+      done_without_ai: "The author set the product priority (optimize tokens but keep thinking for accuracy) and recorded it as a product decision."
+    artifact_sections: [solution-design, trust-and-failure, measurement]
+    links: [prototype/lib/validator.mjs, prototype/test/validator.test.mjs, prototype/server.mjs, prototype/public/app.js, product-artifact/decisions/0013-token-efficiency-with-thinking.md]
+
+  - id: beat-010
+    date: 2026-10-27
+    title: Per-action approval - simple reassignments run on their own, delays always wait
+    summary: After reviewing real proposals, the author decided that moving a job to another qualified technician at the same time is low risk and needs no approval, while delays and other schedule changes always do. Built per-action gating, a simulated customer update, and clearer alternatives in the UI; verified on the base call-out.
+    outcomes:
+      - "Mixed plans work: on the base call-out, J6 and J7 were reassigned immediately with simulated customer updates, while the delayed install J5 and its side effect J12 waited; approving the remainder and then undoing the whole plan both worked."
+      - "Rule enforced in code, not configuration: delays, shifts, displacement, and reschedules cannot be made autonomous. Reassignment stays configurable (scenario S3 makes the business approve everything)."
+      - "Validator and plan tests grew to 13 passing, covering mixed, all-automatic, all-approval, low-confidence, and hand-off plans."
+      - "Alternatives are flagged on the collapsed job card, and an expanded alternative has an arrow and its own button that names the job it applies to."
+    why_it_matters: This answers the case's question of what the agent may do on its own with a concrete, defensible line - risk to the customer's promised time - and shows it can be tuned per business.
+    decisions:
+      - "0014: simple reassignments need no approval and notify the customer; schedule changes always need the dispatcher. Replaces the strictest-action-decides simplification from beat-009."
+    ai_usage:
+      tools: [GitHub Copilot, Pi]
+      purpose: Implemented per-action gating, the alternatives UI, and the updated tests; verified live in the integrated browser.
+      ai_was_wrong: "A prompt edit overwrote the start of the conciseness instruction and broke the numbering; a text search for numbered lines caught it before any run."
+      done_without_ai: "The author made the product call that reassignment is low risk and that delays and schedule pushes must always have dispatcher approval, and asked for alternatives to be visibly flagged."
+      cleanup: "The exploratory spike scripts (spike.mjs, agent-run.mjs, pi-stream.mjs) and run logs were deleted from prototype/; earlier beats still link to them as history."
+    artifact_sections: [solution-design, trust-and-failure]
+    links: [prototype/lib/plan.mjs, prototype/server.mjs, prototype/public/app.js, prototype/config/permissions.yaml, product-artifact/decisions/0014-reassignments-autonomous-delays-approval.md]
+
+  - id: beat-011
+    date: 2026-10-27
+    title: Review against the case; dispatcher-facing autonomy setting added
+    summary: Reviewed the prototype against the case brief and flagged gaps. The biggest was that autonomy and approval could only be set by editing a config file, so the author asked for a Settings button with three levels - Never, Recommended, Always - and it was built and checked in the browser.
+    outcomes:
+      - "Gaps found against the brief and kept for honest reporting: settings were not user-facing, the drive-distance profile is shown only on the same plumbing and HVAC data, only the technician call-out disruption is built, several scenarios are unrun live, and there is no sourced research yet."
+      - "Settings panel opened from the header sets agent autonomy (Never, Recommended, Always); the choice applies to the next call-out, is logged, and survives a day reset. Tests grew to 14 passing."
+      - "The author's idea for trust over time - learn confidence rules from what the dispatcher approves, rejects, or undoes, and customer sentiment - was recorded as a direction, not built, with its weak spots stated."
+    why_it_matters: The case's core ask is that users set what the agent may do on its own. This makes that something a dispatcher can change and show, and the record states what the new setting overrides.
+    decisions:
+      - "0015: a three-level autonomy setting; Always lets delays run without approval, overriding the fixed rule in 0014 only by the business's choice. Safety checks, no cancelling, and the low-confidence gate hold at every level."
+    ai_usage:
+      tools: [GitHub Copilot, Pi]
+      purpose: Reviewed the case brief against the build, implemented the settings panel and server logic, and added tests.
+      ai_was_wrong: "A browser check showed that undo left the technician marked as called out, so a second scenario could not run without a manual reset; it was found while running scenarios, not by the tests."
+      done_without_ai: "The author chose the three level names and the idea of using dispatcher decisions to learn confidence rules, and decided to accept the tension with 0014 for the Always level."
+    artifact_sections: [solution-design, trust-and-failure]
+    links: [prototype/public/app.js, prototype/server.mjs, prototype/lib/plan.mjs, product-artifact/decisions/0015-autonomy-setting-never-recommended-always.md, PLAN.md]
+
+  - id: beat-012
+    date: 2026-10-27
+    title: Product artifact built from a YAML content file
+    summary: Phases 2 to 4 of the plan were filled in, then the artifact page was built so that all its text lives in one YAML file and a small build script renders it to static HTML. Every section was drafted as bullets or tables for use in the review.
+    outcomes:
+      - "Artifact page with eleven numbered sections: problem, assumptions and scope, shared vs. configurable, solution design with the rule-based alternative, trust and failure, measurement, test scenarios, outside references, approach, AI usage, and limitations."
+      - "Each section ends with an explicit weak-spot note; the scenarios table states which were run live (S1, S5, S7) and which were not."
+      - "References state that no outside research was done; the only research is the author's own review of the existing calendar product."
+    why_it_matters: The case asks for a written artifact discussed before the demo. Keeping text in YAML and layout in a template means content edits do not touch the layout, and the page works offline.
+    decisions:
+      - "Artifact rendered by a build script from docs/content/artifact.yaml; docs/index.html is generated and must not be edited by hand."
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Drafted the artifact text from the plan, decision records and run results, and wrote the build script.
+      ai_was_wrong: "The first YAML draft had a stray quote that would have broken the build; the build caught it."
+      done_without_ai: "The author set the rule that the page is fed from a YAML file to save tokens and keep layout separate from content, asked for numbered, bulleted sections for the review, and supplied the calendar product observations."
+    artifact_sections: [all]
+    links: [docs/content/artifact.yaml, docs/build.mjs, docs/template.html, PLAN.md]
+
+  - id: beat-013
+    date: 2026-10-27
+    title: Scheduling priority moved from a config file into Settings
+    summary: A review against the case showed that the industry goal (drive distance for recurring work, revenue for plumbing and HVAC) could only be changed by editing a file. The author asked for it to be a Settings choice, so the Settings panel now sets the scheduling priority (Job revenue or Drive time) next to agent autonomy.
+    outcomes:
+      - "Settings panel has a Scheduling priority choice; it applies to the next call-out, is logged, and is kept across a day reset. Checked in the browser by switching it and reading the state back."
+      - "The profiles stay defined in config, which supplies the starting value; qualifications and urgency are still config files."
+      - "Plan, decision records 0004 and 0007, the artifact, the demo script and the config comments were updated; decision 0016 records the choice."
+    why_it_matters: The case lists different workflows by industry as a core requirement and says users should set it. It is now something a dispatcher can change on screen. It is not yet proven to change outcomes: the one drive-distance run was inconclusive.
+    decisions:
+      - "0016: scheduling priority is a Settings choice between the configured profiles; profile contents stay in config."
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Implemented the setting, updated the documentation, and checked it in the browser.
+      ai_was_wrong: null
+      done_without_ai: "The author asked for the change and tied it to the case's industry examples."
+    artifact_sections: [solution-design, shared-vs-configurable]
+    links: [prototype/server.mjs, prototype/public/app.js, prototype/config/goals.yaml, product-artifact/decisions/0016-scheduling-priority-in-settings.md]
+
+  - id: beat-014
+    date: 2026-10-27
+    title: Plan impact, scenarios from YAML, and sharper goal guidance
+    summary: To make the scheduling priority's effect visible without spending many model runs, the prompt now explains each goal criterion, every proposal shows a deterministic plan-impact line, and the demo scenarios moved from the UI script into a YAML file with two new call-outs.
+    outcomes:
+      - "Goal criteria are defined in config and sent to the model; each rationale now names the deciding criterion."
+      - "Plan impact (revenue covered, revenue handed back, drive minutes to reach moved jobs) is computed in code and shown on the proposal card."
+      - "Scenarios load from config/scenarios.yaml; S9 (HVAC specialist out) and S10 (easy day) added. S10 was run live: one automatic reassignment, $230 covered, 27 drive minutes, about 6K tokens."
+      - "Unit tests grew to 17 passing, including a check that scenarios name real technicians."
+    why_it_matters: It turns the industry-priority claim into something that can be compared by number, at a small token cost, and makes the demo less repetitive.
+    decisions:
+      - "0017: plan impact in code, scenarios in YAML, sharper goal guidance; richer personas, a recurring-service dataset and repeated runs deliberately not done."
+    ai_usage:
+      tools: [GitHub Copilot, Pi]
+      purpose: Costed the options, implemented the changes, and ran one live scenario to check them.
+      ai_was_wrong: null
+      done_without_ai: "The author set the token constraint and chose to proceed with the cheap options after seeing the costs."
+    artifact_sections: [solution-design, measurement, scenarios]
+    links: [prototype/lib/impact.mjs, prototype/config/scenarios.yaml, prototype/config/goals.yaml, product-artifact/decisions/0017-plan-impact-and-scenarios-in-yaml.md]
+
+  - id: beat-015
+    date: 2026-10-27
+    title: Replay mode as a demo safety net
+    summary: The prototype depends on one model through one login with no fallback, so a failed model call would stop the live demo. A replay mode now plays back recorded real proposals while the safety checks, approval and undo still run live.
+    outcomes:
+      - "RECORD=1 saves live proposals; REPLAY=1 plays them back with no login. Three real runs were recorded (S1, S5, S10) for about 25K tokens in total."
+      - "Checked in the browser: replayed proposals return instantly, the safety checks run again on the live schedule, the S5 retry history is preserved, custom reports and bad scenario ids are refused, and the card is labeled as a recording."
+      - "Unit tests grew to 19 passing, including a check that recording ids cannot escape the recordings folder."
+    why_it_matters: It mitigates the biggest practical demo risk and lets a reviewer try the prototype without the author's login, while staying honest that it is a recording and not a second provider.
+    decisions:
+      - "0018: replay mode; a hosted static version and a second live provider were rejected as not worth the effort."
+    ai_usage:
+      tools: [GitHub Copilot, Pi]
+      purpose: Costed the options, implemented record and replay, recorded three runs, and tested replay in the browser.
+      ai_was_wrong: "My first edit to the server defined the replay call but forgot to define the function it used; I caught it on rereading before running it."
+      done_without_ai: "The author decided the replay safety net was worth the tokens after the assistant argued against the hosted static version."
+    artifact_sections: [limitations]
+    links: [prototype/lib/replay.mjs, prototype/server.mjs, prototype/recordings, product-artifact/decisions/0018-replay-mode-for-demo-safety.md]
 
 # Reserved: do not populate or act on until the project plan file exists.
 # Future entries track remaining steps and progress against that plan.

@@ -1,0 +1,42 @@
+# version: 0.4.0
+# tags: [config, qualifications, technicians, urgency, yaml]
+
+# Which skills each job type requires and its default urgency tier (see urgency.yaml).
+# Technician skills live in data/technicians.json. Names are written as people read them.
+# Overrides let a dispatcher force-allow or block a specific technician for a job type.
+# Example values only.
+
+job_types:
+  "Drain cleaning":
+    required_skills: [Plumbing]
+    urgency: standard
+  "Burst pipe repair":
+    required_skills: [Plumbing]
+    urgency: emergency
+  "Sewer line repair":
+    required_skills: [Plumbing]
+    urgency: standard
+  "Faucet repair":
+    required_skills: [Plumbing]
+    urgency: flexible
+  "Toilet repair":
+    required_skills: [Plumbing]
+    urgency: flexible
+  "Water heater repair":
+    required_skills: [Plumbing, Gas certified]
+    urgency: standard
+  "Water heater install":
+    required_skills: [Plumbing, Gas certified]
+    urgency: standard
+  "AC repair":
+    required_skills: [HVAC]
+    urgency: standard
+  "Furnace tune-up":
+    required_skills: [HVAC]
+    urgency: flexible
+
+# technician_overrides:
+#   T3:
+#     allow: ["Water heater install"]
+#     block: []
+technician_overrides: {}

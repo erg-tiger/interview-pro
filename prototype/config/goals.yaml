@@ -1,4 +1,4 @@
-# version: 0.2.0
+# version: 0.4.0
 # tags: [config, scheduling, goals, industries, yaml]
 
 # Scheduling goal profiles. A profile defines two ordered lists of criteria:
@@ -11,15 +11,26 @@
 #   proximity, revenue_protected, route_clustering   (technician_ranking)
 #   revenue_protected = the candidate whose assignment puts the least revenue at risk on their own schedule.
 
-# Business setting. Overrides the industry default below.
+# Starting default only. The dispatcher chooses the scheduling priority in the Settings panel (decision 0016),
+# which overrides this value until the server restarts.
 active_profile: job_revenue
 
-# Default profile by industry, used until a business sets active_profile.
+# Default profile by industry, used until a business sets its priority.
 industries:
   plumbing: job_revenue
   hvac: job_revenue
   home_cleaning: drive_distance
   pool_cleaning: drive_distance
+
+# What each criterion means. Sent to the model for the criteria in the active profile.
+criteria:
+  urgency: cover the jobs with the tightest urgency tier first
+  job_revenue: cover the higher-value jobs first
+  customer_wait: cover the customers who have waited longest or whose notes say they are waiting first
+  route_fit: cover the jobs that sit on a technician's existing route first
+  proximity: prefer the technician with the least drive time to the job from where they will be
+  revenue_protected: prefer the technician whose taking this job puts the least revenue at risk on their own schedule
+  route_clustering: prefer the technician whose stops stay closest together
 
 profiles:
   drive_distance:

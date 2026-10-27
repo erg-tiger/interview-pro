@@ -1,0 +1,94 @@
+{
+  "version": "0.2.0",
+  "tags": ["data", "synthetic", "technicians", "json"],
+  "technicians": [
+    {
+      "id": "T1",
+      "name": "Marcus Hale",
+      "skills": ["Plumbing"],
+      "home": { "label": "Home, Eastgate", "x": 14, "y": 11 },
+      "status": "idle",
+      "location_type": "office",
+      "current_location": { "label": "Office, 100 Main St", "x": 10, "y": 10 },
+      "current_job_id": null,
+      "free_at": "10:30"
+    },
+    {
+      "id": "T2",
+      "name": "Priya Nair",
+      "skills": ["Plumbing"],
+      "home": { "label": "Home, Maplewood", "x": 5, "y": 13 },
+      "status": "on_job",
+      "location_type": "job",
+      "current_location": { "label": "88 Maple Ct", "x": 6, "y": 14 },
+      "current_job_id": "J2",
+      "free_at": "11:15"
+    },
+    {
+      "id": "T3",
+      "name": "Dana Ortiz",
+      "skills": ["Plumbing", "Gas certified"],
+      "home": { "label": "Home, Northfield", "x": 8, "y": 13 },
+      "status": "idle",
+      "location_type": "home",
+      "current_location": { "label": "Home, Northfield", "x": 8, "y": 13 },
+      "current_job_id": null,
+      "free_at": "10:30"
+    },
+    {
+      "id": "T4",
+      "name": "Luis Romero",
+      "skills": ["HVAC"],
+      "home": { "label": "Home, Harbor View", "x": 16, "y": 5 },
+      "status": "on_job",
+      "location_type": "job",
+      "current_location": { "label": "14 Dockside Rd", "x": 15, "y": 6 },
+      "current_job_id": "J8",
+      "free_at": "12:00"
+    },
+    {
+      "id": "T5",
+      "name": "Tom Becker",
+      "skills": ["HVAC"],
+      "home": { "label": "Home, Westbrook", "x": 4, "y": 5 },
+      "status": "idle",
+      "location_type": "home",
+      "current_location": { "label": "Home, Westbrook", "x": 4, "y": 5 },
+      "current_job_id": null,
+      "free_at": "10:30"
+    },
+    {
+      "id": "T6",
+      "name": "Aisha Khan",
+      "skills": ["Plumbing", "Gas certified"],
+      "home": { "label": "Home, Lakeview", "x": 13, "y": 17 },
+      "status": "on_job",
+      "location_type": "job",
+      "current_location": { "label": "31 Birch Ave", "x": 12, "y": 16 },
+      "current_job_id": "J11",
+      "free_at": "12:15"
+    },
+    {
+      "id": "T7",
+      "name": "Ben Carter",
+      "skills": ["Plumbing"],
+      "home": { "label": "Home, Southgate", "x": 2, "y": 16 },
+      "status": "on_job",
+      "location_type": "job",
+      "current_location": { "label": "402 Quarry Rd", "x": 3, "y": 17 },
+      "current_job_id": "J13",
+      "free_at": "13:30"
+    },
+    {
+      "id": "T8",
+      "name": "Chloe Ward",
+      "skills": ["HVAC", "Gas certified"],
+      "home": { "label": "Home, Ridgemont", "x": 17, "y": 13 },
+      "status": "idle",
+      "location_type": "home",
+      "current_location": { "label": "Home, Ridgemont", "x": 17, "y": 13 },
+      "current_job_id": null,
+      "free_at": "10:30"
+    }
+  ]
+}

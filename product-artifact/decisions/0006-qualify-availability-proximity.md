@@ -1,5 +1,5 @@
 ---
-version: 0.6.1
+version: 0.6.2
 tags: [decision, adr, scheduling, qualifications, availability, proximity, redistribution, displacement]
 ---
 
@@ -22,16 +22,16 @@ When a job must move to another technician (call-out, overrun), the agent needs 
 
 Option 2, in this order:
 
-1. **Qualification (hard filter, fixed):** keep technicians qualified for the job, using `docs/config/qualifications.yaml` (including overrides). This is the qualified pool.
+1. **Qualification (hard filter, fixed):** keep technicians qualified for the job, using `prototype/config/qualifications.yaml` (including overrides). This is the qualified pool.
 2. **Availability (hard filter, fixed):** within the pool, keep technicians who can take the job in its time window, accounting for when their current job is expected to finish.
-3. **Ranking (profile-driven):** rank the remaining technicians by `technician_ranking` in the active profile in `docs/config/goals.yaml`. Proximity is primary in the drive-distance profile and a tiebreaker in the revenue profile.
+3. **Ranking (profile-driven):** rank the remaining technicians by `technician_ranking` in the active profile in `prototype/config/goals.yaml`. Proximity is primary in the drive-distance profile and a tiebreaker in the revenue profile.
 4. **Job priority (profile-driven):** when capacity is short, order jobs by `job_priority` in the active profile (urgency and job revenue for the revenue profile).
 
 Proximity is dynamic and based on the technician's status. An idle technician is measured from home or the office. A technician on a job is measured from that job's address.
 
-**Fallback when no qualified technician is available:** reuse the qualified pool. Use the time remaining on each busy technician's current job to find their earliest start, and propose a delayed slot with the one who frees up soonest (the profile's ranking breaks ties). If the earliest start exceeds the job's allowed delay (`docs/config/urgency.yaml`), or the pool is empty, hand off and report why.
+**Fallback when no qualified technician is available:** reuse the qualified pool. Use the time remaining on each busy technician's current job to find their earliest start, and propose a delayed slot with the one who frees up soonest (the profile's ranking breaks ties). If the earliest start exceeds the job's allowed delay (`prototype/config/urgency.yaml`), or the pool is empty, hand off and report why.
 
-**Displacement option:** when the active profile favors it and covering a higher-priority job requires bumping a lower-priority one, the agent may propose displacing the lower-priority job. This is never autonomous; `displace_job` and `propose_delayed_slot` require dispatcher approval in `docs/config/permissions.yaml`.
+**Displacement option:** when the active profile favors it and covering a higher-priority job requires bumping a lower-priority one, the agent may propose displacing the lower-priority job. This is never autonomous; `displace_job` and `propose_delayed_slot` require dispatcher approval in `prototype/config/permissions.yaml`.
 
 ```mermaid
 flowchart TD

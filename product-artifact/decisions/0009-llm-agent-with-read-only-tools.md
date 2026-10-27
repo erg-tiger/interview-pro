@@ -1,11 +1,11 @@
 ---
-version: 0.1.0
+version: 0.1.2
 tags: [decision, adr, agent, llm, tools, validator]
 ---
 
 # 0009: Agent uses an LLM with read-only tools; code only validates and applies
 
-- **Status:** accepted
+- **Status:** accepted; the tool loop is superseded by [0011](0011-single-call-inputs-in-prompt.md), the rest stands
 - **Date:** 2026-10-27
 
 ## Context
@@ -26,7 +26,7 @@ Option 3.
 - **Read-only tools (three):** `get_schedule`, `get_technician_status`, `get_travel_minutes`. There is no qualification-check tool, so qualification stays the model's judgment over skills and job requirements.
 - **The model decides** qualification, availability, ranking, delays, and when to hand off, and explains its reasoning, assumptions, and rejected alternatives.
 - **The agent never writes.** Code applies approved proposals to the mock calendar.
-- **Validator (the only hard rules):** schema is valid; the technician exists and is qualified; the slot has no overlap; the action respects its mode in `permissions.yaml`; delayed slots respect the urgency limit. One retry with errors fed back, then hand off.
+- **Validator (the only hard rules):** schema is valid; the technician exists and is qualified; the slot has no overlap; the gap between consecutive jobs for a technician is at least the travel time (added after a real run proposed a 15:45 start that was infeasible by four minutes); every overlap the plan creates is resolved by a listed side effect (a run left a collision with another job unresolved); the action respects its mode in `permissions.yaml`; delayed slots respect the urgency limit. One retry with errors fed back, then hand off.
 - **Loop cap:** 6 tool rounds. Timeout, LLM error, or low confidence leads to a handoff with no calendar change.
 - **Spike first:** verify tool calling and structured output with the chosen provider before building on it. If it fails, fall back to option 1.
 

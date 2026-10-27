@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "tags": [
+    "prototype",
+    "node",
+    "pi",
+    "package"
+  ],
+  "name": "scheduling-agent-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/validator.test.mjs"
+  },
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "1.4.0",
+    "js-yaml": "5.5.0"
+  }
+}

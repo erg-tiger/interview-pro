@@ -1,5 +1,5 @@
 ---
-version: 0.1.0
+version: 0.1.2
 tags: [decision, adr, persona, segment, on-demand]
 ---
 
@@ -19,7 +19,7 @@ The case fixes the persona (dispatcher at a business with 7-10 technicians) but 
 
 ## Decision
 
-Option 1. It exercises the qualification config and revenue goal directly. Route-based is shown as a configuration change (`active_profile: drive_distance` in `docs/config/goals.yaml`) on the same agent, which demonstrates the shared-versus-configurable split.
+Option 1. It exercises the qualification config and revenue goal directly. Route-based is shown as a Settings choice (scheduling priority: drive time, defined by `drive_distance` in `prototype/config/goals.yaml`; see [0016](0016-scheduling-priority-in-settings.md)) on the same agent, which demonstrates the shared-versus-configurable split.
 
 ## AI involvement
 

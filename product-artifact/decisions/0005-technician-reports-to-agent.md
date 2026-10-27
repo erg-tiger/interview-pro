@@ -1,5 +1,5 @@
 ---
-version: 0.2.0
+version: 0.2.1
 tags: [decision, adr, scope, technician, input-channel, persona]
 ---
 
@@ -20,7 +20,7 @@ Disruptions often originate with the technician (a job running long, a call-out,
 
 ## Decision
 
-Option 3. The dispatcher is the only persona with a built interface. A technician report (job running long, call-out, possible reschedule) is triggered from the dispatcher view as a canned message, and technician and customer notifications appear as mock previews or log lines. The dispatcher remains the approver, so permissions in `docs/config/permissions.yaml` still gate every action.
+Option 3. The dispatcher is the only persona with a built interface. A technician report (job running long, call-out, possible reschedule) is triggered from the dispatcher view as a canned message, and technician and customer notifications appear as mock previews or log lines. The dispatcher remains the approver, so permissions in `prototype/config/permissions.yaml` still gate every action.
 
 ## AI involvement
 

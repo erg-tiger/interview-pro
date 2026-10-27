@@ -1,20 +1,22 @@
-# version: 0.2.0
+# version: 0.3.1
 # tags: [config, permissions, approval, yaml]
 
 # What the agent may do on its own. Each action is one of:
 #   autonomous - agent acts, dispatcher can undo
 #   approval   - agent proposes, dispatcher must approve
 #   forbidden  - agent never does this, hands off instead
-# Example values only.
+# Example values only, except where noted.
 
 actions:
-  shift_job_time:
-    mode: autonomous
-    limits:
-      max_shift_minutes: 30
+  # Moving a job to another qualified technician at the same time. Low risk: the customer still
+  # gets the job at the same time, and is sent an update that a new technician is assigned (decision 0014).
   reassign_job:
-    mode: approval
+    mode: autonomous
+  # Anything that pushes or changes the schedule needs the dispatcher unless the business sets autonomy
+  # to "always" in Settings (decisions 0014 and 0015). The Settings level overwrites the modes in this file.
   propose_delayed_slot:
+    mode: approval
+  shift_job_time:
     mode: approval
   displace_job:
     mode: approval

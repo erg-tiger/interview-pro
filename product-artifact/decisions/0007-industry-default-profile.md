@@ -1,5 +1,5 @@
 ---
-version: 0.1.0
+version: 0.1.2
 tags: [decision, adr, industry, goals, profile, config]
 ---
 
@@ -19,7 +19,7 @@ The case says scheduling workflows vary across industries and customers. Recurri
 
 ## Decision
 
-Option 2. `docs/config/goals.yaml` maps industries to default profiles, and the business's `active_profile` overrides the default. Industry is also a segment variant on the dispatcher persona in the plan.
+Option 2. `prototype/config/goals.yaml` maps industries to default profiles, and the business's `active_profile` overrides the default. Industry is also a segment variant on the dispatcher persona in the plan. *Update: the business now chooses the profile in the Settings panel, with the config value as the starting default ([0016](0016-scheduling-priority-in-settings.md)).*
 
 ## AI involvement
 

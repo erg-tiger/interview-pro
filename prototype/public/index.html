@@ -1,0 +1,30 @@
+<!--
+version: 0.4.0
+tags: [prototype, frontend, dispatcher, html, settings]
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Same-day scheduling agent (prototype)</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header id="header"></header>
+  <main>
+    <section id="settings" aria-label="Settings" hidden></section>
+    <section id="controls" aria-label="Report a call-out"></section>
+    <div class="overview">
+      <section id="proposal" aria-label="Agent proposal"></section>
+      <div class="side">
+        <section id="tray" aria-label="Needs the dispatcher"></section>
+        <section id="log" aria-label="Audit log"></section>
+      </div>
+    </div>
+    <section id="day" aria-label="Day view"></section>
+  </main>
+  <footer>Prototype with synthetic data only.</footer>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "tags": ["data", "synthetic", "customers", "json"],
+  "customers": [
+    { "id": "C1", "name": "Harbor Street Cafe", "phone": "555-0101", "notes": "Needs the kitchen drain clear before dinner service." },
+    { "id": "C2", "name": "Mbeki Residence", "phone": "555-0102", "notes": null },
+    { "id": "C3", "name": "Castellano Residence", "phone": "555-0103", "notes": "Repeat customer." },
+    { "id": "C4", "name": "Hartwell Residence", "phone": "555-0104", "notes": null },
+    { "id": "C5", "name": "Okafor Residence", "phone": "555-0105", "notes": "Water heater failed; no hot water since yesterday; elderly resident; asked for same-day service." },
+    { "id": "C6", "name": "Pine Row Dental", "phone": "555-0106", "notes": "Business customer; slow drain in staff restroom." },
+    { "id": "C7", "name": "Lindqvist Residence", "phone": "555-0107", "notes": "Prefers afternoon visits." },
+    { "id": "C8", "name": "Dockside Dental Supply", "phone": "555-0108", "notes": null },
+    { "id": "C9", "name": "Park Residence", "phone": "555-0109", "notes": "Annual tune-up; flexible on timing." },
+    { "id": "C10", "name": "Ng Residence", "phone": "555-0110", "notes": null },
+    { "id": "C11", "name": "Birch Avenue Apartments", "phone": "555-0111", "notes": "Property manager on site." },
+    { "id": "C12", "name": "Fitzgerald Residence", "phone": "555-0112", "notes": null },
+    { "id": "C13", "name": "Quarry Road Bakery", "phone": "555-0113", "notes": "Sewer backup; business closed until fixed." },
+    { "id": "C14", "name": "Summit Drive HOA", "phone": "555-0114", "notes": "Annual tune-up; flexible on timing." }
+  ]
+}

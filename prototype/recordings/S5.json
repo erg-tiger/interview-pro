@@ -1,0 +1,120 @@
+{
+  "version": "0.1.0",
+  "tags": [
+    "recording",
+    "replay",
+    "synthetic"
+  ],
+  "scenario": "S5",
+  "recorded_at": "2026-10-27T18:56:34.918Z",
+  "model": "github-copilot/claude-haiku-5.5",
+  "thinking": "low",
+  "priority": "job_revenue",
+  "result": {
+    "proposal": {
+      "summary": "Dana's absence affects three jobs. J5 (water heater install) can only go to Aisha Khan, who frees up at 12:15, so it moves to 12:19 and pushes her toilet repair J12 back. J6 goes to Marcus Hale, who is 4 minutes away. J7 goes to Marcus at a 4-minute later start, which needs dispatcher approval.",
+      "overall_confidence": 0.6,
+      "assumptions": [
+        "Aisha Khan finishes J11 at 12:15 as scheduled and travels 4 minutes to 250 Lakeview Dr, so she starts J5 at 12:19.",
+        "J5 keeps its 3-hour duration, so it ends at 15:19. Travel from J5 to J12 is 40 minutes, so J12 moves to 15:59-16:59.",
+        "Marcus Hale finishes J1 at 14:00 and reaches 77 Pine Row in 4 minutes."
+      ],
+      "side_effects": [
+        {
+          "job_id": "J12",
+          "technician_id": "T6",
+          "new_start": "15:59",
+          "new_end": "16:59",
+          "reason": "Aisha Khan's J5 run to 250 Lakeview Dr displaces her toilet repair; J12 is flexible and finishes before 17:00. Requires shift_job_time approval."
+        }
+      ],
+      "jobs": [
+        {
+          "job_id": "J5",
+          "outcome": "delay",
+          "technician_id": "T6",
+          "new_start": "12:19",
+          "new_end": "15:19",
+          "rationale": "Aisha Khan is the only technician with both Plumbing and Gas certification who is available, so she is the only option. Her 79-minute delay is within the 240-minute standard limit and serves the highest-revenue job first.",
+          "confidence": 0.6,
+          "handoff_reason": null,
+          "alternatives": [
+            {
+              "outcome": "hand_off",
+              "technician_id": null,
+              "new_start": null,
+              "new_end": null,
+              "tradeoff": "Leaves the $1,850 job and an elderly customer without hot water for longer, with no qualified technician to cover it today."
+            }
+          ]
+        },
+        {
+          "job_id": "J6",
+          "outcome": "reassign",
+          "technician_id": "T1",
+          "new_start": "14:30",
+          "new_end": "15:30",
+          "rationale": "Marcus Hale is free after J1 and only needs 4 minutes to reach 77 Pine Row, so this is the same slot with no revenue at risk. Proximity decides, since every qualified plumber has no conflicts.",
+          "confidence": 0.85,
+          "handoff_reason": null,
+          "alternatives": []
+        },
+        {
+          "job_id": "J7",
+          "outcome": "delay",
+          "technician_id": "T1",
+          "new_start": "15:49",
+          "new_end": "16:49",
+          "rationale": "Marcus Hale has the shortest drive (19 minutes from J6) among qualified plumbers, so proximity decides. Because he arrives after 15:45, the job starts 4 minutes late, which is allowed since it is flexible.",
+          "confidence": 0.6,
+          "handoff_reason": null,
+          "alternatives": [
+            {
+              "outcome": "reassign",
+              "technician_id": "T2",
+              "new_start": "15:45",
+              "new_end": "16:45",
+              "tradeoff": "Keeps the original slot with no delay, but Priya Nair's drive is 28 minutes, 9 minutes longer than Marcus's."
+            }
+          ]
+        }
+      ]
+    },
+    "attempts": [
+      {
+        "n": 1,
+        "injected": true,
+        "errors": [
+          {
+            "code": "unqualified",
+            "message": "J5: Chloe Ward is not qualified for Water heater install.",
+            "job_id": "J5"
+          },
+          {
+            "code": "unqualified",
+            "message": "J6: Chloe Ward is not qualified for Drain cleaning.",
+            "job_id": "J6"
+          },
+          {
+            "code": "unqualified",
+            "message": "J7: Chloe Ward is not qualified for Faucet repair.",
+            "job_id": "J7"
+          }
+        ]
+      },
+      {
+        "n": 2,
+        "injected": false,
+        "errors": []
+      }
+    ],
+    "seconds": 21.3,
+    "tokens": {
+      "input": 4,
+      "output": 4735,
+      "cacheRead": 0,
+      "cacheWrite": 4529,
+      "total": 9268
+    }
+  }
+}
