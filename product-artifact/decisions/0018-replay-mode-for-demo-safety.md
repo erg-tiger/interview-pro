@@ -1,5 +1,5 @@
 ---
-version: 0.1.0
+version: 0.1.1
 tags: [decision, adr, demo, reliability, replay, recording]
 ---
 
@@ -26,7 +26,7 @@ Option 3.
 - `RECORD=1` saves each successful live proposal to `prototype/recordings/<scenario id>.json`, with the date, model and priority it was recorded under. `REPLAY=1` returns the recording instead of calling the model, and needs no login.
 - Only the model is replayed. The recorded proposal is checked again against the live schedule and config, and approval, undo, settings and the audit log all run for real. A replayed proposal is never trusted from a file.
 - The proposal card carries a banner saying it is a recording of a real run, with its date, model and priority.
-- Three scenarios are recorded: **S1** (the base call-out), **S5** (the injected unsafe plan with its retry) and **S10** (an easy, fully automatic plan). Any other scenario or a custom report is refused with a message. Each replay needs the day reset first, because the recording assumes the starting schedule.
+- Three scenarios are recorded: **S1** (an easy, fully automatic plan), **S2** (the base call-out) and **S6** (the injected unsafe plan with its retry). These were S10, S1 and S5 when recorded; see [0019](0019-six-scenario-test-set.md). Any other scenario or a custom report is refused with a message. Each replay needs the day reset first, because the recording assumes the starting schedule.
 - Scenario ids are used as file names, so only short plain ids are accepted.
 
 ## AI involvement

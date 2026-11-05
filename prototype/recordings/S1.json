@@ -6,69 +6,39 @@
     "synthetic"
   ],
   "scenario": "S1",
-  "recorded_at": "2026-10-27T18:56:08.903Z",
+  "recorded_at": "2026-10-27T18:55:43.716Z",
   "model": "github-copilot/claude-haiku-5.5",
   "thinking": "low",
   "priority": "job_revenue",
   "result": {
     "proposal": {
-      "summary": "Dana's absence removes J5, J6 and J7. J5 goes to Aisha Khan as a delay to 12:19, which pushes her toilet repair J12 to 16:00 and needs dispatcher approval. J6 goes to Marcus Hale and J7 to Priya Nair in their existing slots.",
-      "overall_confidence": 0.7,
+      "summary": "Marcus's only affected job is J1 (drain cleaning, 13:00-14:00). Plumber Aisha Khan (T6) can reach 9 Harbor St from her 31 Birch Ave job by 12:42 and keep the 13:00 slot with no revenue at risk, so this is a reassignment with no delay and no side effects.",
+      "overall_confidence": 0.9,
       "assumptions": [
-        "Aisha Khan finishes J11 at 12:15 at 31 Birch Ave and can leave immediately, so J5 starts 12:19 (4 min travel).",
-        "J12 (toilet repair, flexible urgency) can be moved to 16:00-17:00 with approval and the customer's consent.",
-        "Taking J6 and J7 does not conflict with any other job in each technician's schedule."
+        "J1 is the only job Marcus (T1) loses; his other jobs are none, and J1 is the only T1 job in the data.",
+        "T6 finishes J11 at 12:15 as scheduled, despite the property manager being on site.",
+        "Travel from J11's location (31 Birch Ave) to J1 is 27 minutes, per the travel_minutes matrix."
       ],
-      "side_effects": [
-        {
-          "job_id": "J12",
-          "technician_id": "T6",
-          "new_start": "16:00",
-          "new_end": "17:00",
-          "reason": "Displaced to make room for J5 delay; needs approval (displace_job) and customer contact. Travel J5 to J12 is 40 min, so 15:19 end plus 40 min gives 15:59, rounded to 16:00 start."
-        }
-      ],
+      "side_effects": [],
       "jobs": [
         {
-          "job_id": "J5",
-          "outcome": "delay",
+          "job_id": "J1",
+          "outcome": "reassign",
           "technician_id": "T6",
-          "new_start": "12:19",
-          "new_end": "15:19",
-          "rationale": "Aisha Khan is the only Plumbing and Gas certified technician, and she is free at 12:15 nearby, so the highest-revenue urgent job is covered first via a delay of 79 minutes, within the 240-minute standard limit. Doing so requires displacing J12, which is flexible, to 16:00-17:00.",
-          "confidence": 0.7,
+          "new_start": "13:00",
+          "new_end": "14:00",
+          "rationale": "Urgency ties at standard, so job revenue decides the order; T6 is the only qualified technician who can keep the 13:00 slot, arriving at 12:42. On the revenue_protected criterion, T6 puts no revenue at risk because the next job (J12 at 15:00) still starts after the 14:19 return from J1.",
+          "confidence": 0.9,
           "handoff_reason": null,
           "alternatives": [
             {
-              "outcome": "hand_off",
-              "technician_id": null,
-              "new_start": null,
-              "new_end": null,
-              "tradeoff": "Keeps J12 at 15:00 but leaves a $1850 same-day water heater job uncovered for an elderly customer with no hot water."
+              "outcome": "delay",
+              "technician_id": "T2",
+              "new_start": "13:28",
+              "new_end": "14:28",
+              "tradeoff": "Priya finishes J3 at 13:00 and needs 28 minutes to reach Harbor St, so J1 slips 28 minutes; this is within the standard 240-minute limit but disrupts the customer for no benefit."
             }
           ]
-        },
-        {
-          "job_id": "J6",
-          "outcome": "reassign",
-          "technician_id": "T1",
-          "new_start": "14:30",
-          "new_end": "15:30",
-          "rationale": "Marcus Hale is free after J1 ends at 14:00 and reaches 77 Pine Row in 4 minutes, so the 14:30 slot is kept with no revenue at risk. Tiebreak over Priya Nair goes to proximity (4 min vs 24 min).",
-          "confidence": 0.9,
-          "handoff_reason": null,
-          "alternatives": []
-        },
-        {
-          "job_id": "J7",
-          "outcome": "reassign",
-          "technician_id": "T2",
-          "new_start": "15:45",
-          "new_end": "16:45",
-          "rationale": "Priya Nair is free after J3 ends at 13:00 and reaches 5 Willow Way in 28 minutes, so the 15:45 slot is kept with no revenue at risk. Marcus Hale can only serve it with a delay because of his J6 travel.",
-          "confidence": 0.9,
-          "handoff_reason": null,
-          "alternatives": []
         }
       ]
     },
@@ -79,13 +49,13 @@
         "errors": []
       }
     ],
-    "seconds": 21.6,
+    "seconds": 9.8,
     "tokens": {
       "input": 4,
-      "output": 4786,
+      "output": 1951,
       "cacheRead": 0,
-      "cacheWrite": 4434,
-      "total": 9224
+      "cacheWrite": 4437,
+      "total": 6392
     }
   }
 }

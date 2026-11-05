@@ -1,5 +1,5 @@
 ---
-version: 0.23.0
+version: 0.24.0
 tags: [plan, scope, phases, test-criteria, draft]
 ---
 
@@ -161,7 +161,7 @@ Nothing here is confirmed by the case or by research. Each needs a source, a dis
   - **Untrusted text in the prompt:** customer notes and the dispatcher's note go to the model. A crafted note could try to steer it. The validator and permissions limit the damage, but the text itself is not sanitized.
   - **Privacy:** real customer data would go to a model provider; this prototype uses synthetic data only.
   - **Latency and cost:** about 20 seconds and about 4,000 output tokens per proposal on the small model with low thinking (decision 0013).
-  - **Dependencies:** a single model provider (Pi with one Copilot login); there is no provider-neutral adapter and no fallback model, despite what decision 0010 originally intended (see its 2026-10-27 correction). A replay mode plays back three recorded real runs (S1, S5, S10) when the live model is unavailable ([decision 0018](product-artifact/decisions/0018-replay-mode-for-demo-safety.md)). Two npm audit findings in a transitive dependency are accepted for a local prototype.
+  - **Dependencies:** a single model provider (Pi with one Copilot login); there is no provider-neutral adapter and no fallback model, despite what decision 0010 originally intended (see its 2026-10-27 correction). A replay mode plays back three recorded real runs (S1, S2, S6) when the live model is unavailable ([decision 0018](product-artifact/decisions/0018-replay-mode-for-demo-safety.md)). Two npm audit findings in a transitive dependency are accepted for a local prototype.
   - **Stale or missing data:** the agent assumes the schedule and technician locations it is given are current.
 
 ### Process: from call-out to outcome
@@ -202,9 +202,9 @@ flowchart TD
 - **Inspect (built):** Every job in a proposal shows the agent's reasoning (at most two sentences), its confidence, whether it needs approval, and what it was before. The proposal lists the assumptions the agent made, at most one alternative per job with its tradeoff (delay, revenue or job at risk), and the safety-check results. Time and token use are shown. The audit log records every call-out, proposal, automatic change, approval, rejection, undo, setting change, and simulated customer message. Gap: the exact inputs given to the model were removed from the screen to cut clutter, though the server keeps them; decide whether to restore a link to them.
 - **Correct and undo (built):** Before approving, the dispatcher can switch a job to the agent's alternative (re-validated), restore the agent's original, approve the rest, or reject. After anything is applied, one undo reverses the whole plan, including the parts that ran automatically, and logs it. Customers who were told about a new technician get a simulated correction. Known gap: undo restores the schedule but not the technician's called-out status, so the day must be reset to repeat a report. Not built: undoing one change within a plan, or editing a proposal freely (FE4).
 - **Recover (built, partly tested):**
-  - **Agent wrong:** the validator blocks proposals that break qualification, availability, travel, urgency, or the day's end. It sends one correction back to the model; if the second attempt fails, the jobs are handed to the dispatcher with the reasons. Run live as S5 (an injected unsafe plan was caught and the agent recovered).
-  - **Agent uncertain:** a plan below the confidence threshold waits for approval whatever the autonomy setting, and ambiguous notes are surfaced as stated assumptions (S6, not yet run live).
-  - **No feasible option:** the job is handed off with the reason and the rest of the plan is still proposed (S4, not yet run live).
+  - **Agent wrong:** the validator blocks proposals that break qualification, availability, travel, urgency, or the day's end. It sends one correction back to the model; if the second attempt fails, the jobs are handed to the dispatcher with the reasons. Run live as S6 (an injected unsafe plan was caught and the agent recovered).
+  - **Agent uncertain:** a plan below the confidence threshold waits for approval whatever the autonomy setting, and ambiguous notes are surfaced as stated assumptions (S3).
+  - **No feasible option:** the job is handed off with the reason and the rest of the plan is still proposed (S5; S4 also handed off once in two live runs).
   - **Tool or model failure:** the server turns a model error into a hand-off and leaves the schedule unchanged. Coded, but not triggered live.
   - **Wrong after it was applied:** undo, as above.
 - **Trust over time (direction, not built):** Use the confidence level as a learning signal. Record what the dispatcher does with each proposal (approved unchanged, switched to an alternative, rejected, undone) and, later, customer sentiment, and use that history to set the confidence rules that decide what may run on its own. Where an action type has a strong approval record, offer to raise it toward Always; where it is often undone, lower it. The dispatcher stays in control: the system recommends the autonomy level (requirement 16) and the dispatcher accepts it. Not built; the prototype only logs approvals, rejections, and undos. Weak spot: with one dispatcher's few decisions per day this learns slowly, and customer sentiment needs a source that does not exist yet (assumption).
@@ -335,22 +335,18 @@ These are demo mechanics, kept apart from the product requirements above:
 
 ## Test scenarios
 
-All ten are call-outs against the base data. S1 to S8 use Dana Ortiz (plumbing and gas-certified, out at 10:30); S9 and S10 use other technicians. The scenarios are defined in `prototype/config/scenarios.yaml` ([decision 0017](product-artifact/decisions/0017-plan-impact-and-scenarios-in-yaml.md)). Expected behavior is a hypothesis to check against the real agent, not an exact output.
+Six call-outs against the base data, each differing in who is out, what the note says, or which safety path it exercises. Dana Ortiz (plumbing and gas-certified, out at 10:30) is the anchor for S2, S3, S5 and S6; S1 uses Marcus and S4 uses Tom. The scenarios are defined in `prototype/config/scenarios.yaml` ([decision 0019](product-artifact/decisions/0019-six-scenario-test-set.md), which maps the earlier S1 to S10 ids). Expected behavior is a hypothesis to check against the real agent, not an exact output.
 
-| # | Scenario | Setup | Expected behavior | Friction |
-|---|---|---|---|---|
-| S1 | Base call-out, revenue profile | Dana out for the day | The $1,850 install gets a qualified technician (Aisha, free 12:15) in a delayed slot within the urgency limit; the drain and faucet jobs go to qualified, available technicians; all need approval | F1, F4, F7 |
-| S2 | Same call-out, drive-distance profile | Scheduling priority set to Drive time (Settings; the demo scenario applies the same override) | Different choices than S1 for at least one job, driven by proximity; reasoning mentions the profile | F3, F4 |
-| S3 | The business approves every change | Set `reassign_job` to approval | Even the simple reassignments wait for approval with the rest of the plan; nothing is applied until the dispatcher approves | F5, F8 |
-| S4 | Failure: nobody qualified and free in time | Aisha unavailable, or the install set to an emergency tier | Agent hands off the install with the reason; the other jobs are still proposed | F1, F7 |
-| S5 | Failure: validator catches a bad proposal | Injected proposal assigns the install to Chloe (gas-certified, not a plumber) | Validator rejects it, one retry, then handoff; the calendar is unchanged | F7, F8 |
-| S6 | Ambiguous note | Note says "not sure if I'll be back this afternoon" | Agent states its assumption, covers the confirmed part, and flags uncertainty or lowers confidence | F2, F4 |
-| S7 | Approve then undo | Approve the S1 plan, then undo | The calendar returns to its original state and the log shows both steps | F8 |
-| S8 | Choose an offered alternative | In S1, pick an alternative the agent offered (for example a later slot or a different technician) | The alternative states its tradeoff, passes validation, is applied on approval, and the choice is logged | F4, F8 |
-| S9 | HVAC specialist out | Tom (HVAC) cannot work; the other two HVAC technicians have jobs nearby in time | A reassignment, delay or hand-off with a stated reason; not yet run live | F1, F4 |
-| S10 | Easy day, one drain job | Marcus is out for the day with one simple drain job | A single reassignment that runs without approval under Recommended, with a customer update | F5 |
+| # | Scenario | Setup | Agent action to show | Expected behavior | Friction |
+|---|---|---|---|---|---|
+| S1 | Easy day, one drain job | Marcus is out for the day with one simple drain job | Automatic reassignment | One reassignment at the same time to a qualified technician, applied without approval under Recommended, with a simulated customer update | F5 |
+| S2 | Base call-out, Dana out all day | Dana out for the day; Job revenue priority | Mixed plan: automatic, waiting, undo | The $1,850 install gets a qualified technician (Aisha, free 12:15) in a delayed slot within the urgency limit and waits for approval; the drain and faucet jobs are reassigned on their own; approve, then undo returns the calendar to its original state | F1, F4, F7, F8 |
+| S3 | Ambiguous note | Note says "not sure if I'll be back this afternoon, maybe by 2pm" | Stated assumption, confidence gate | Agent states its assumption and lowers confidence below the threshold, so every change waits for approval | F2, F4 |
+| S4 | HVAC specialist out | Tom (HVAC) cannot work; the other two HVAC technicians overlap his one job | Displacement or hand-off | A displacement proposal that waits for approval, or a hand-off with a stated reason; never applied on its own. Two live runs gave one of each | F1, F4 |
+| S5 | **Failure:** nobody qualified and free in time | Same Dana report, install set to an emergency tier | Hand-off with a reason | Agent hands off the install with the reason; the other jobs are still proposed | F1, F7 |
+| S6 | **Failure:** validator catches a bad proposal | Injected proposal assigns the install to Chloe (gas-certified, not a plumber) | Rejection, retry, corrected plan | Validator rejects it, one retry, then handoff; the calendar is unchanged | F7, F8 |
 
-Every scenario is stored as data and traces to the friction points in Phase 1c. S5 uses an injected proposal and must be labelled as such in the demo.
+Every scenario is stored as data and traces to the friction points in Phase 1c. S6 uses an injected proposal and must be labelled as such in the demo. Cut from the earlier ten: the drive-time run (inconclusive), the approve-everything run (covered by the Settings Never level), the alternative-choice run (never built) and the approve-then-undo run (now a step inside S2). Priority and permission changes are shown in Settings, not as scenarios.
 
 ## Items for the product artifact
 
@@ -358,13 +354,13 @@ Agent mechanics that were shown on the prototype screen. The dispatcher-facing s
 
 | # | Item | Was shown | What to say in the artifact |
 |---|---|---|---|
-| A1 | Active goal profile (job revenue vs. drive distance) | Header badge (removed) | Goals are configuration per business, with industry defaults (decision 0007); how the profile changes decisions (S2); requirements 4 and 8 |
-| A2 | Permission mode per action (autonomous, approval, forbidden) and how a business changes it | Header list (removed) | The autonomy model, how trust builds over time, and per-action approval as a future enhancement (S3, FE1); requirements 8 and 9 |
+| A1 | Active goal profile (job revenue vs. drive distance) | Header badge (removed) | Goals are configuration per business, with industry defaults (decision 0007); how the profile changes decisions (no scenario shows it; Settings only); requirements 4 and 8 |
+| A2 | Permission mode per action (autonomous, approval, forbidden) and how a business changes it | Header list (removed) | The autonomy model, how trust builds over time, and per-action approval as a future enhancement (Settings, FE1); requirements 8 and 9 |
 | A3 | Model, provider, and thinking level | Header line (removed) | Why this model and thinking on at a low level, and the latency and cost tradeoff (decisions 0010 and 0013) |
 | A4 | Time and tokens per proposal | Proposal card and audit log (now only inside the collapsed details) | Measurement: cost per resolved call-out and latency (FE3) |
 | A5 | The inputs provided to the agent, and the safety-check results per attempt | Proposal card (raw inputs removed from the screen; safety checks stay in the collapsed details) | Inspectability: how a dispatcher sees the basis for an action, with the raw inputs shown in the artifact; what the validator guarantees (decision 0009) |
 | A6 | The wait message that mentioned thinking | Spinner text (reworded) | Why a plan takes up to half a minute and how the UI makes the wait visible |
-| A7 | Scenario presets and test overrides (injected unsafe proposal, urgency override, permission overrides) | Demo-only panel | The test set of scenarios, and honesty that S5 injects a failure |
+| A7 | Scenario presets and test overrides (injected unsafe proposal, urgency override, permission overrides) | Demo-only panel | The test set of scenarios, and honesty that S6 injects a failure |
 | A8 | The synthetic-data notice | Header (moved to the footer) | Data policy: synthetic data only |
 
 ## Steps

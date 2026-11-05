@@ -1,4 +1,4 @@
-// version: 0.1.1
+// version: 0.2.0
 // tags: [prototype, validator, guarantees]
 
 // The only hard rules in the system. The model proposes; this decides whether a proposal is safe to show or apply.
@@ -71,7 +71,12 @@ export function validate(proposal, ctx, opts = {}) {
     if (!tech) {
       fail("unknown_technician", `${job.id}: technician ${techId} does not exist.`, job.id);
     } else {
-      if (tech.id === callOut.technician_id) fail("absent_technician", `${job.id}: ${tech.name} is the technician who called out.`, job.id);
+      if (tech.id === callOut.technician_id) {
+        const returnTime = callOut.until ? toMin(callOut.until) : Infinity;
+        if (!HHMM.test(start ?? "") || toMin(start) < returnTime) {
+          fail("absent_technician", `${job.id}: ${tech.name} is unavailable until ${callOut.until ?? "the end of the day"}.`, job.id);
+        }
+      }
       if (!qualified(tech, job, ctx.config.qualifications)) fail("unqualified", `${job.id}: ${tech.name} is not qualified for ${job.type}.`, job.id);
     }
     if (!HHMM.test(start ?? "") || !HHMM.test(end ?? "")) {
@@ -157,7 +162,7 @@ export function validate(proposal, ctx, opts = {}) {
   const changed = new Set(moves.filter((m) => m.kind !== "hand_off").map((m) => m.job_id));
   const handedOff = new Set(moves.filter((m) => m.kind === "hand_off").map((m) => m.job_id));
   const schedule = jobs
-    .filter((j) => j.status !== "completed" && !handedOff.has(j.id) && j.assigned_to !== callOut.technician_id)
+    .filter((j) => j.status !== "completed" && !handedOff.has(j.id) && !affectedIds.has(j.id))
     .map((j) => ({ id: j.id, tech: j.assigned_to, start: toMin(j.start), end: toMin(j.end), loc: j.address }));
   for (const m of moves.filter((x) => x.kind !== "hand_off")) {
     const j = byId.get(m.job_id);
@@ -173,9 +178,10 @@ export function validate(proposal, ctx, opts = {}) {
     if (!tech) continue;
     list.sort((a, b) => a.start - b.start);
     const first = list[0];
-    if (tech.status === "idle" && changed.has(first.id)) {
+    if ((tech.status === "idle" || (techId === callOut.technician_id && callOut.until)) && changed.has(first.id)) {
       const need = travelMinutes(tech.current_location, first.loc, business.minutes_per_mile);
-      if (first.start < now + need) fail("travel", `${tech.name} is at ${tech.current_location.label} and needs ${need} minutes to reach ${first.id}, so the earliest start is ${toHHMM(now + need)}.`, first.id);
+      const availableAt = techId === callOut.technician_id && callOut.until ? Math.max(now, toMin(callOut.until)) : now;
+      if (first.start < availableAt + need) fail("travel", `${tech.name} is at ${tech.current_location.label} and needs ${need} minutes to reach ${first.id}, so the earliest start is ${toHHMM(availableAt + need)}.`, first.id);
     }
     for (let i = 0; i + 1 < list.length; i++) {
       const a = list[i];

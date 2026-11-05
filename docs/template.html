@@ -1,5 +1,5 @@
 <!--
-version: 0.2.0
+version: 0.5.0
 tags: [artifact, template, html, layout]
 -->
 <!-- Layout only. Text comes from content/artifact.yaml; build with: node docs/build.mjs -->
@@ -13,24 +13,55 @@ tags: [artifact, template, html, layout]
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <header>
+  <header class="bar" id="bar">
+    <span class="brand">{{brand}}</span>
+    <nav class="nav-links" aria-label="Sections">
+{{nav}}
+    </nav>
+  </header>
+  <div class="hero">
     <h1>{{title}}</h1>
     <p>{{subtitle}}</p>
-  </header>
-  <div class="layout">
-    <nav aria-label="Sections">
-      <ol>
-{{nav}}
-      </ol>
-    </nav>
-    <main>
-{{content}}
-    </main>
+    <p class="hint">Use the left and right arrow keys to move between sections.</p>
   </div>
+  <main>
+{{content}}
+  </main>
   <footer>
     <p>{{data_notice}}</p>
     <p>{{prototype_note}}</p>
   </footer>
   {{scripts}}
+  <script>
+    const links = [...document.querySelectorAll(".nav-links a")];
+    const sections = [...document.querySelectorAll("main .sec")];
+    const setActive = (id) => links.forEach((link) => link.classList.toggle("active", link.dataset.id === id));
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) setActive(visible.target.id);
+    }, { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.1, 0.5] });
+    sections.forEach((section) => observer.observe(section));
+
+    const currentSectionIndex = () => {
+      const position = window.scrollY + 180;
+      let index = -1;
+      sections.forEach((section, i) => { if (section.offsetTop <= position) index = i; });
+      return index;
+    };
+
+    document.addEventListener("keydown", (event) => {
+      if (event.target.closest("input, textarea, select, button")) return;
+      const current = currentSectionIndex();
+      if (event.key === "ArrowRight") {
+        sections[Math.min(current + 1, sections.length - 1)].scrollIntoView();
+        event.preventDefault();
+      } else if (event.key === "ArrowLeft") {
+        const previous = current <= 0 ? null : sections[current - 1];
+        if (previous) previous.scrollIntoView();
+        else window.scrollTo({ top: 0, behavior: "smooth" });
+        event.preventDefault();
+      }
+    });
+  </script>
 </body>
 </html>

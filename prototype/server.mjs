@@ -1,4 +1,4 @@
-// version: 0.6.0
+// version: 0.7.0
 // tags: [prototype, server, api, state, audit-log, approval, settings, autonomy, goals, scenarios, impact, replay]
 
 // Run: node server.mjs, then open http://127.0.0.1:3000 (localhost only: it uses the author's Copilot login).

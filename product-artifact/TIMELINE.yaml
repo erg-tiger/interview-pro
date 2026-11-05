@@ -1,4 +1,4 @@
-version: 0.18.0
+version: 0.22.0
 tags: [timeline, process, product-artifact, ai-usage]
 
 # Purpose: a running log of work completed. For now its sole use is to populate the product artifact.
@@ -111,7 +111,7 @@ beats:
   - id: beat-005
     date: 2026-10-27
     title: Pi with a Copilot login streams tokens from a baby Node app
-    summary: Validated only the runtime question: can a small Node app stream model tokens through Pi's SDK using the author's Copilot license. Scheduling quality was deliberately not tested.
+    summary: "Validated only the runtime question: can a small Node app stream model tokens through Pi's SDK using the author's Copilot license. Scheduling quality was deliberately not tested."
     outcomes:
       - Pi SDK installed locally and called in-process, avoiding the PowerShell launcher block.
       - A script and a localhost-only server streamed tokens over server-sent events from a Copilot model, with all tools, extensions, skills, and context files disabled.
@@ -289,7 +289,7 @@ beats:
       - "Settings panel has a Scheduling priority choice; it applies to the next call-out, is logged, and is kept across a day reset. Checked in the browser by switching it and reading the state back."
       - "The profiles stay defined in config, which supplies the starting value; qualifications and urgency are still config files."
       - "Plan, decision records 0004 and 0007, the artifact, the demo script and the config comments were updated; decision 0016 records the choice."
-    why_it_matters: The case lists different workflows by industry as a core requirement and says users should set it. It is now something a dispatcher can change on screen. It is not yet proven to change outcomes: the one drive-distance run was inconclusive.
+    why_it_matters: "The case lists different workflows by industry as a core requirement and says users should set it. It is now something a dispatcher can change on screen. It is not yet proven to change outcomes: the one drive-distance run was inconclusive."
     decisions:
       - "0016: scheduling priority is a Settings choice between the configured profiles; profile contents stay in config."
     ai_usage:
@@ -338,6 +338,82 @@ beats:
       done_without_ai: "The author decided the replay safety net was worth the tokens after the assistant argued against the hosted static version."
     artifact_sections: [limitations]
     links: [prototype/lib/replay.mjs, prototype/server.mjs, prototype/recordings, product-artifact/decisions/0018-replay-mode-for-demo-safety.md]
+
+  - id: beat-016
+    date: 2026-10-28
+    title: Artifact restyled and 60-minute run of show written
+    summary: A review against the case led to a consistent confidence and hand-off story, seven scenarios, and the author's informal Reddit reading added as qualitative input. The artifact page was restyled to match a sibling case page, and a run of show was written for the one-hour session.
+    outcomes:
+      - "Artifact trimmed to seven live scenarios; hand-off wording now matches the code."
+      - "Artifact page rebuilt with a sticky nav, section headlines and cards."
+      - "Run of show covers artifact first, then process and demo, with likely questions drawn from the known weak spots."
+    why_it_matters: The session is judged on how honestly the design, limits and trust story are presented, so the weak spots are now named in the artifact and rehearsed in the run of show.
+    decisions:
+      - "Reddit reading is described as anecdotal input, not evidence of prevalence."
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Reviewed the artifact against the case, restyled the page and drafted the run of show.
+      ai_was_wrong: null
+      done_without_ai: "The author supplied the Reddit research and chose the sibling page as the style reference."
+    artifact_sections: [all]
+    links: [docs/content/artifact.yaml, product-artifact/run-of-show.md]
+
+  - id: beat-017
+    date: 2026-11-05
+    title: Test set cut to six differentiated scenarios
+    summary: The ten scenario ids overlapped (six were the same Dana report with one setting changed) and did not match across the plan, config and artifact. The set was cut to six, renumbered S1 to S6, and each now names the agent action it shows. Two are failure cases.
+    outcomes:
+      - "Six scenarios: automatic reassignment, mixed plan with approve and undo, ambiguous note, HVAC specialist out, hand-off, and an injected unsafe plan."
+      - "Tom's scenario was run live twice and gave a hand-off once and an approval-gated displacement once, so it is described as varied."
+      - "Recordings renamed to the new ids; plan, config, artifact and demo materials updated; no data or agent code changed."
+    why_it_matters: The case asks for 5 to 8 scenarios including a failure. Each scenario now tests one distinct behaviour and the artifact claims only what was actually run.
+    decisions:
+      - "Priority and permission changes are shown in Settings, not as scenarios; the inconclusive drive-time run is dropped rather than shown."
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Reviewed the scenarios against the case, proposed eight, ran the unrun scenario live and updated the documents.
+      ai_was_wrong: null
+      done_without_ai: "The author chose six scenarios over the proposed eight."
+    artifact_sections: [scenarios]
+    links: [prototype/config/scenarios.yaml, product-artifact/decisions/0019-six-scenario-test-set.md]
+
+  - id: beat-018
+    date: 2026-11-05
+    title: Prototype requirements rewritten as a build-ready product spec
+    summary: The earlier requirements were broader than the accepted prototype scope and included unapproved behaviors. They were rewritten as product requirements with Given/When/Then acceptance criteria grounded in the case and accepted decisions.
+    outcomes:
+      - "The build scope is explicit: a simulated technician call-out, dispatcher-only interface, configurable scheduling priority and autonomy, validated actions, approvals, handoff, history, and undo."
+      - "Acceptance criteria cover the six configured scenarios and distinguish invariant checks from variable model choices."
+      - "Synthetic data, mock integrations, replay disclosure, and deferred work are stated explicitly."
+    why_it_matters: The spec can guide implementation and verification without expanding scope or treating assumptions and model output as fixed behavior.
+    decisions:
+      - "The six-scenario set and call-out-only scope follow accepted decisions 0012 and 0019."
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Rewrote the requirements into a build-ready product specification and acceptance criteria.
+      ai_was_wrong: "The earlier draft expanded the prototype to overruns, customer reschedules, cancellations, and flows that conflicted with accepted scope; it was replaced with requirements grounded in the accepted decisions."
+      done_without_ai: "The author asked for conventional product requirements with acceptance criteria and set the requirement that they be clear enough to build from."
+    artifact_sections: [requirements]
+    links: [REQUIREMENTS.md, product-artifact/decisions/0012-scope-technician-call-out-only.md, product-artifact/decisions/0019-six-scenario-test-set.md]
+
+  - id: beat-019
+    date: 2026-11-05
+    title: Partial-day call-out return time implemented and documented
+    summary: The existing 13:00 call-out option previously marked a technician unavailable for the whole day. The prototype now treats that time as a return boundary, preserves later jobs, and validates return-time assignments; S7, product requirements, presentation notes, and the artifact document the behavior.
+    outcomes:
+      - "The agent receives explicit return-time guidance; the validator rejects assignments before return and checks travel and retained-job conflicts."
+      - "S7 and focused validator tests cover overlapping and later jobs, feasible return assignment, and rejected early or conflicting assignments."
+      - "S7 completed one live run: J5 moved to Aisha at 12:19 and her J12 shifted, both awaiting approval; Dana's later jobs stayed assigned. The run of show identifies S7 as live-only."
+    why_it_matters: A visible partial-day option must behave as promised, and the presentation should make no stronger claim than the tests and runs support.
+    decisions:
+      - "0020: treat the existing 13:00 choice as a return time; defer arbitrary availability windows."
+    ai_usage:
+      tools: [GitHub Copilot]
+      purpose: Implemented return-time scheduling behavior, regression tests, and aligned the prototype requirements and presentation materials.
+      ai_was_wrong: "The earlier requirements treated partial-day input as if it were already supported; inspection showed the technician remained unavailable for the whole day."
+      done_without_ai: "The author confirmed that partial-day call-outs should work and requested that the behavior be covered in tests, the run of show, and the product artifact."
+    artifact_sections: [scenarios, limitations]
+    links: [prototype/lib/validator.mjs, prototype/lib/agent.mjs, prototype/config/scenarios.yaml, prototype/test/validator.test.mjs, REQUIREMENTS.md, product-artifact/run-of-show.md, product-artifact/decisions/0020-partial-day-callout-return-time.md]
 
 # Reserved: do not populate or act on until the project plan file exists.
 # Future entries track remaining steps and progress against that plan.

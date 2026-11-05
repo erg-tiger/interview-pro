@@ -1,4 +1,4 @@
-// version: 0.4.0
+// version: 0.5.0
 // tags: [prototype, test, validator, approval]
 
 // Run: npm test   (or: node --test test/validator.test.mjs)
@@ -6,6 +6,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { loadConfig, loadWorld } from "../lib/world.mjs";
 import { checkPlan, subProposal } from "../lib/plan.mjs";
+import { affectedJobs } from "../lib/validator.mjs";
 
 const world = await loadWorld();
 const baseConfig = await loadConfig();
@@ -16,6 +17,12 @@ const makeCtx = (config = clone(baseConfig), jobUrgency = {}) => ({
   jobUrgency,
   callOut: { technician_id: "T3", from: "10:30", until: null, note: "" },
 });
+const makeReturnCtx = () => {
+  const ctx = makeCtx();
+  ctx.callOut = { technician_id: "T3", from: "10:30", until: "13:00", note: "" };
+  ctx.technicians.find((t) => t.id === "T3").status = "out";
+  return ctx;
+};
 
 const job = (job_id, outcome, technician_id, new_start, new_end) => ({
   job_id,
@@ -50,6 +57,63 @@ test("a sound plan passes; simple reassignments run on their own and the rest wa
   assert.equal(result.classification.planMode, "mixed");
   assert.deepEqual(result.classification.autoIds.sort(), ["J6", "J7"]);
   assert.deepEqual(result.classification.approvalIds.sort(), ["J12", "J5"]);
+});
+
+test("a partial-day call-out affects overlapping jobs but preserves later jobs", () => {
+  const ctx = makeReturnCtx();
+  assert.deepEqual(affectedJobs(ctx).map((j) => j.id), ["J5"]);
+});
+
+test("the called-out technician can take a feasible job starting at the return time", () => {
+  const ctx = makeReturnCtx();
+  ctx.jobs = [ctx.jobs.find((j) => j.id === "J5")];
+  ctx.technicians.find((t) => t.id === "T3").current_location = ctx.jobs[0].address;
+  const plan = {
+    summary: "Return after a partial-day call-out",
+    overall_confidence: 0.8,
+    assumptions: [],
+    side_effects: [],
+    jobs: [job("J5", "delay", "T3", "13:00", "16:00")],
+  };
+  assert.deepEqual(checkPlan(plan, ctx).errors, []);
+});
+
+test("the called-out technician cannot start a job before the return time", () => {
+  const ctx = makeReturnCtx();
+  ctx.jobs = [ctx.jobs.find((j) => j.id === "J5")];
+  const plan = {
+    summary: "Starts before return",
+    overall_confidence: 0.8,
+    assumptions: [],
+    side_effects: [],
+    jobs: [job("J5", "delay", "T3", "12:00", "15:00")],
+  };
+  assert.ok(codes(checkPlan(plan, ctx)).includes("absent_technician"));
+});
+
+test("the called-out technician needs travel time after the return time", () => {
+  const ctx = makeReturnCtx();
+  ctx.jobs = [ctx.jobs.find((j) => j.id === "J5")];
+  const plan = {
+    summary: "Not enough time to travel after return",
+    overall_confidence: 0.8,
+    assumptions: [],
+    side_effects: [],
+    jobs: [job("J5", "delay", "T3", "13:05", "16:05")],
+  };
+  assert.ok(codes(checkPlan(plan, ctx)).includes("travel"));
+});
+
+test("later existing jobs remain in the schedule when checking a returned technician", () => {
+  const ctx = makeReturnCtx();
+  const plan = {
+    summary: "Would overlap the technician's later job",
+    overall_confidence: 0.8,
+    assumptions: [],
+    side_effects: [],
+    jobs: [job("J5", "delay", "T3", "13:30", "16:30")],
+  };
+  assert.ok(codes(checkPlan(plan, ctx)).includes("overlap"));
 });
 
 test("the simple reassignments are valid on their own", () => {

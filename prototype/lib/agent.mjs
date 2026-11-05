@@ -1,4 +1,4 @@
-// version: 0.1.4
+// version: 0.2.0
 // tags: [prototype, agent, pi, prompt, tokens]
 
 import {
@@ -114,15 +114,16 @@ export function buildPrompt(ctx) {
 
 Reason with judgment:
 1. Find every job that loses its technician because of the call-out (call_out.note may add context; state any assumption you make).
-2. Only technicians whose skills cover the job type's required_skills (or an override) may take it.
-3. Check availability and travel: the slot must be free, plus the travel_minutes from where the technician will be (a job id as the origin means after finishing that job). No overlaps; finish by workday_end.
-4. Among qualified, available technicians, choose using the active goals profile: job_priority says which jobs to cover first; technician_ranking is applied in order (the first criterion decides, the next ones break ties); goals.criteria explains each term. Name the deciding criterion in each job's rationale.
-5. If no qualified technician is free in time, consider "delay" (later start, same duration) with a qualified technician who frees up, within the job's urgency limit (urgency_tiers). Otherwise "hand_off" with a reason.
-6. "reassign" = new technician, same slot. "delay" = new technician, later slot. "hand_off" = no change.
-7. If your plan makes another job move, list it under side_effects with the technician who will do it. Otherwise leave side_effects empty.
-8. Prefer a reassignment over a delay when it serves the goal equally well: it disrupts the customer less. The permissions field shows which changes the dispatcher must approve.
-9. Be concise: rationale at most 2 sentences, at most 3 assumptions, at most 1 alternative per job (omit if none is meaningful) with its tradeoff (delay, revenue or job at risk).
-10. Give confidence from 0 to 1; lower it when an assumption matters.
+2. If call_out.until is set, treat it as the technician's return time: jobs starting before it are unavailable to that technician; jobs starting at or after it may remain assigned to or be reassigned to that technician. Preserve the technician's existing jobs that do not overlap the call-out.
+3. Only technicians whose skills cover the job type's required_skills (or an override) may take it.
+4. Check availability and travel: the slot must be free, plus the travel_minutes from where the technician will be (a job id as the origin means after finishing that job). For the returning technician, travel starts no earlier than call_out.until. No overlaps; finish by workday_end.
+5. Among qualified, available technicians, choose using the active goals profile: job_priority says which jobs to cover first; technician_ranking is applied in order (the first criterion decides, the next ones break ties); goals.criteria explains each term. Name the deciding criterion in each job's rationale.
+6. If no qualified technician is free in time, consider "delay" (later start, same duration) with a qualified technician who frees up, within the job's urgency limit (urgency_tiers). Otherwise "hand_off" with a reason.
+7. "reassign" = new technician, same slot. "delay" = new technician, later slot. "hand_off" = no change.
+8. If your plan makes another job move, list it under side_effects with the technician who will do it. Otherwise leave side_effects empty.
+9. Prefer a reassignment over a delay when it serves the goal equally well: it disrupts the customer less. The permissions field shows which changes the dispatcher must approve.
+10. Be concise: rationale at most 2 sentences, at most 3 assumptions, at most 1 alternative per job (omit if none is meaningful) with its tradeoff (delay, revenue or job at risk).
+11. Give confidence from 0 to 1; lower it when an assumption matters.
 
 Reply with exactly this JSON shape and nothing else:
 ${SCHEMA}

@@ -1,5 +1,5 @@
 /*
-version: 0.9.0
+version: 0.10.0
 tags: [prototype, frontend, dispatcher, javascript, settings, goals, scenarios, impact, replay]
 */
 
@@ -228,7 +228,7 @@ function renderDay() {
     return h(
       "div",
       { class: "line" },
-      h("div", { class: "name" }, h("strong", {}, t.id), " ", t.status === "out" ? h("span", { class: "out" }, `${t.name} (Out)`) : t.name, h("small", {}, `${t.skills.join(", ")} | ${STATUS_LABELS[t.status] ?? t.status}`)),
+      h("div", { class: "name" }, h("strong", {}, t.id), " ", t.status === "out" ? h("span", { class: "out" }, `${t.name} (${snap.pending?.callOut.technician_id === t.id && snap.pending.callOut.until ? `Out until ${snap.pending.callOut.until}` : "Out"})`) : t.name, h("small", {}, `${t.skills.join(", ")} | ${STATUS_LABELS[t.status] ?? t.status}`)),
       h("div", { class: "track" }, nowLine, ...blocks, ...ghostBlocks),
     );
   });

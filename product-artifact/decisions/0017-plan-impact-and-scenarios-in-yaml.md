@@ -1,11 +1,11 @@
 ---
-version: 0.1.0
+version: 0.1.1
 tags: [decision, adr, scenarios, metrics, prompt, yaml]
 ---
 
 # 0017: Plan impact in code, scenarios in YAML, and sharper goal guidance in the prompt
 
-- **Status:** accepted (product decision made by the author, scoped to be cheap in tokens)
+- **Status:** accepted (product decision made by the author, scoped to be cheap in tokens); the scenario list was later replaced by [0019](0019-six-scenario-test-set.md)
 - **Date:** 2026-10-27
 
 ## Context

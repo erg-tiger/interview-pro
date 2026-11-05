@@ -5,7 +5,7 @@
     "replay",
     "synthetic"
   ],
-  "scenario": "S5",
+  "scenario": "S6",
   "recorded_at": "2026-10-27T18:56:34.918Z",
   "model": "github-copilot/claude-haiku-5.5",
   "thinking": "low",

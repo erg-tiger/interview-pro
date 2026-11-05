@@ -1,4 +1,4 @@
-// version: 0.1.0
+// version: 0.2.0
 // tags: [prototype, test, impact, scenarios]
 
 import test from "node:test";
@@ -32,7 +32,9 @@ test("reassigned jobs count as covered and add drive minutes to reach them", () 
 test("every scenario names a real technician and ids are unique", async () => {
   const scenarios = await loadScenarios();
   const techIds = new Set(world.technicians.map((t) => t.id));
-  assert.ok(scenarios.length >= 8);
+  assert.ok(scenarios.length >= 5 && scenarios.length <= 8);
+  assert.ok(scenarios.some((s) => /^S\d+ Failure/.test(s.label)), "the set needs at least one failure scenario");
+  assert.equal(scenarios.find((s) => s.id === "S7")?.until, "13:00", "S7 must cover the partial-day return");
   for (const s of scenarios) assert.ok(techIds.has(s.technician_id), `${s.id}: unknown technician ${s.technician_id}`);
   assert.equal(new Set(scenarios.map((s) => s.id)).size, scenarios.length);
 });

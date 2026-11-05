@@ -1,60 +1,54 @@
-# version: 0.1.0
+# version: 0.3.0
 # tags: [config, scenarios, demo, yaml]
 
 # Demo scenarios for the call-out form. Each one fills in a report and may override a setting for that run only.
 # Fields: id, label, description, technician_id, until (HH:MM, empty = rest of the day), note,
 #         overrides: profile | permissions | jobUrgency | inject
-# The expected results for S1 to S8 are in PLAN.md; S9 and S10 have not been run live.
+# Descriptions say what the scenario shows and what the agent is expected to do. Expected results are hypotheses.
+# Recordings for replay mode are keyed by id (S1, S2, S6). Decision 0019 maps the old ids (S1 to S10) to these.
 
 scenarios:
   - id: S1
-    label: S1 Base call-out
-    description: Dana calls in sick for the rest of the day. The agent uses the scheduling priority set in Settings (start on Job revenue).
-    technician_id: T3
-    note: Dana called in sick this morning and will not work today.
+    label: S1 Easy day, one drain job
+    description: "Shows: a low-risk action that runs on its own. Marcus is out with one drain job (J1). Expect: one reassignment to a qualified technician at the same time, applied without approval, with a simulated customer notice."
+    technician_id: T1
+    note: Marcus has a dentist appointment and is out for the day.
 
   - id: S2
-    label: S2 Same report, business optimizes drive distance
-    description: The same report, but this run forces the Drive time priority, whatever Settings says.
+    label: S2 Base call-out, Dana out all day
+    description: "Shows: the full agent flow. Dana is out for the rest of the day with three jobs. Expect: J6 and J7 reassigned on their own; the $1,850 install (J5) delayed to the one other gas-certified plumber, pushing her J12, both waiting for approval. Approve, then undo."
     technician_id: T3
     note: Dana called in sick this morning and will not work today.
-    overrides: { profile: drive_distance }
 
   - id: S3
-    label: S3 Same report, business approves every change
-    description: The same report, but this business wants to approve every change, even simple reassignments.
+    label: S3 Ambiguous note
+    description: "Shows: judgment on free text. Dana is unsure whether she will be back. Expect: the agent states what it assumes, confidence drops below the 0.7 threshold, and every change waits for approval."
     technician_id: T3
-    note: Dana called in sick this morning and will not work today.
-    overrides: { permissions: { reassign_job: approval } }
+    note: Not sure if I will be back this afternoon, maybe by 2pm.
 
   - id: S4
-    label: "S4 Failure: no qualified technician free in time"
-    description: The same report, but the water heater install (J5) is an emergency, so a late start is not acceptable.
+    label: S4 HVAC specialist out
+    description: "Shows: a different trade under pressure. Tom (HVAC) is out with one job (J10). Both other HVAC technicians overlap it. Expect: a displacement or hand-off, never applied on its own. Two live runs gave a hand-off once and an approval-gated reassignment (displacing J9) once."
+    technician_id: T5
+    note: Tom's truck broke down on the way in; he cannot do any jobs today.
+
+  - id: S5
+    label: "S5 Failure: no qualified technician free in time"
+    description: "Shows: the agent stopping and handing off. The same Dana report, but the water heater install (J5) is an emergency, so a late start is not acceptable. Expect: J5 handed off with the reason; J6 and J7 are still reassigned."
     technician_id: T3
     note: Dana called in sick this morning and will not work today.
     overrides: { jobUrgency: { J5: emergency } }
 
-  - id: S5
-    label: "S5 Failure: the first proposal is unsafe (injected test)"
-    description: The same report, but the first proposal is deliberately unsafe, to show the safety checks catching it.
+  - id: S6
+    label: "S6 Failure: the first proposal is unsafe (injected test)"
+    description: "Shows: the safety checks catching a bad plan. The same Dana report, but the first proposal is deliberately unsafe (injected). Expect: the checks reject it, the agent retries, and the corrected plan is shown."
     technician_id: T3
     note: Dana called in sick this morning and will not work today.
     overrides: { inject: true }
 
-  - id: S6
-    label: S6 Ambiguous note
-    description: Dana is unsure whether she will be back. The agent has to say what it assumes.
+  - id: S7
+    label: S7 Partial-day return
+    description: "Shows: a technician returning at 13:00. Dana's water-heater install (J5) overlaps the call-out and needs an outcome; her later jobs (J6 and J7) remain assigned. Any proposed work for Dana must start at or after 13:00 and pass travel and schedule checks."
     technician_id: T3
-    note: Not sure if I will be back this afternoon, maybe by 2pm.
-
-  - id: S9
-    label: S9 HVAC specialist out
-    description: Tom, an HVAC technician, has a truck breakdown. Only two other HVAC technicians exist and both have jobs nearby in time.
-    technician_id: T5
-    note: Tom's truck broke down on the way in; he cannot do any jobs today.
-
-  - id: S10
-    label: S10 Easy day, one drain job
-    description: Marcus is out for the day with one simple drain job. A low-risk plan that can run without approval.
-    technician_id: T1
-    note: Marcus has a dentist appointment and is out for the day.
+    until: "13:00"
+    note: Dana is unavailable this morning and can return at 13:00.
